@@ -32,10 +32,8 @@
 #include <iostream>
 #include "Eigen/Eigen"
 //#include "../GEO/Polyline.h"
-//#include "FEMEnums.h"
-//#include "tools.h" // HS: needed for the function GetCurveValue() 
-#include <math.h>
 #include "BHE_Net_ELE_Abstract.h"
+#include "MathLib/InterpolationAlgorithms/PiecewiseLinearInterpolation.h"
 
 namespace BHE  // namespace of borehole heat exchanger
 {
@@ -57,8 +55,23 @@ namespace BHE  // namespace of borehole heat exchanger
         BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT,
         BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE,
         BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE,
-        BHE_BOUND_FIXED_TEMP_DIFF,
+        BHE_BOUND_FIXED_TEMP_DIFF
     };
+
+    /**
+      * list the possible primary variables for the HEAT_TRANSPORT_BHE process
+      */
+    enum BHE_PRIMARY_VARS {
+        BHE_TEMP_SOIL, 
+        BHE_TEMP_IN_1, 
+        BHE_TEMP_IN_2,
+        BHE_TEMP_OUT_1,
+        BHE_TEMP_OUT_2,
+        BHE_TEMP_G_1,
+        BHE_TEMP_G_2,
+        BHE_TEMP_G_3,
+        BHE_TEMP_G_4
+    }; 
 
     /**
       * discharge type of the 2U BHE
@@ -68,14 +81,34 @@ namespace BHE  // namespace of borehole heat exchanger
         BHE_DISCHARGE_TYPE_SERIAL       // serial discharge
     };
 
+    const double PI = 3.14159265358979323846264338327950288419716939937510582;
+
     class BHEAbstract : public BHE_Net_ELE_Abstract
     {
     public:
         /**
           * constructor
           */
-        BHEAbstract(BHE_TYPE my_type, const std::string name, BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUND_FIXED_INFLOW_TEMP, bool if_use_ext_Ra_Rb = false, bool user_defined_R_vals = false, int bhe_heating_cop_curve_idx = -1, int bhe_cooling_cop_curve_idx = -1, bool if_flowrate_curve = false, int n_T_in = 1, int n_T_out = 1)
-            : BHE_Net_ELE_Abstract(name, BHE::BHE_NET_ELE::BHE_NET_BOREHOLE, n_T_in, n_T_out), type(my_type), _name(name), bound_type(my_bound_type), use_ext_therm_resis(if_use_ext_Ra_Rb), user_defined_therm_resis(user_defined_R_vals), _heating_cop_curve_idx(bhe_heating_cop_curve_idx), _cooling_cop_curve_idx(bhe_cooling_cop_curve_idx), use_flowrate_curve(if_flowrate_curve)
+        BHEAbstract(BHE_TYPE my_type, 
+            const std::string name, 
+            MathLib::PiecewiseLinearInterpolation const& bhe_heating_cop_curve,
+            MathLib::PiecewiseLinearInterpolation const& bhe_cooling_cop_curve,
+            BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUND_FIXED_INFLOW_TEMP, 
+            bool if_use_ext_Ra_Rb = false, 
+            bool user_defined_R_vals = false, 
+            bool if_flowrate_curve = false, 
+            int n_T_in = 1, 
+            int n_T_out = 1)
+            : BHE_Net_ELE_Abstract(name, 
+                BHE::BHE_NET_ELE::BHE_NET_BOREHOLE, n_T_in, n_T_out), 
+                type(my_type), 
+                _name(name), 
+                bound_type(my_bound_type), 
+                use_ext_therm_resis(if_use_ext_Ra_Rb), 
+                user_defined_therm_resis(user_defined_R_vals), 
+                _heating_cop_curve(bhe_heating_cop_curve), 
+                _cooling_cop_curve(bhe_cooling_cop_curve), 
+                use_flowrate_curve(if_flowrate_curve)
         {};
 
         /**
@@ -237,7 +270,7 @@ namespace BHE  // namespace of borehole heat exchanger
         /**
           * return the shift index based on primary variable value
           */
-        virtual int get_loc_shift_by_pv(FiniteElement::PrimaryVariable pv_name) = 0;
+        virtual int get_loc_shift_by_pv(BHE::BHE_PRIMARY_VARS pv_name) = 0;
 
         /**
           * return the number of grout zones in this BHE.  
@@ -384,9 +417,9 @@ namespace BHE  // namespace of borehole heat exchanger
         double power_in_watt_val; 
 
         /**
-          * index of the power in watt curve
+          * power in watt curve
           */
-        std::size_t power_in_watt_curve_idx; 
+        MathLib::PiecewiseLinearInterpolation & power_in_watt_curve;
 
         /**
           * temperature difference between inflow and 
@@ -446,14 +479,14 @@ namespace BHE  // namespace of borehole heat exchanger
         double ext_Rgs;
 
         /**
-        * heating COP curve index
+        * heating COP curve
         */
-        const int _heating_cop_curve_idx;
+        MathLib::PiecewiseLinearInterpolation const& _heating_cop_curve;
 
         /**
-        * cooling COP curve index
+        * cooling COP curve
         */
-        const int _cooling_cop_curve_idx;
+        MathLib::PiecewiseLinearInterpolation const& _cooling_cop_curve;
 
         /**
         * use refrigerant flow rate curve
@@ -463,7 +496,7 @@ namespace BHE  // namespace of borehole heat exchanger
         /**
         * refrigerant flow rate curve
         */
-        int flowrate_curve_idx;
+        MathLib::PiecewiseLinearInterpolation & flowrate_curve;
 
         /**
           * for BHEs, the RHS value is zero 

@@ -365,15 +365,15 @@ double BHE_CXA::get_boundary_heat_exchange_coeff(std::size_t idx_unknown)
     return exchange_coeff;
 }
 
-int BHE_CXA::get_loc_shift_by_pv(FiniteElement::PrimaryVariable pv_name)
+int BHE_CXA::get_loc_shift_by_pv(BHE::BHE_PRIMARY_VARS pv_name)
 {
     int idx(0);
 
-    if (pv_name == FiniteElement::TEMPERATURE_IN_1)
+    if (pv_name == BHE::BHE_PRIMARY_VARS::BHE_TEMP_IN_1)
         idx = 0;
-    else if (pv_name == FiniteElement::TEMPERATURE_OUT_1)
+    else if (pv_name == BHE::BHE_PRIMARY_VARS::BHE_TEMP_OUT_1)
         idx = 1;
-    else if (pv_name == FiniteElement::TEMPERATURE_G_1)
+    else if (pv_name == BHE::BHE_PRIMARY_VARS::BHE_TEMP_G_1)
         idx = 2;
 
     return idx;
