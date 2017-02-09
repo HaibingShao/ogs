@@ -44,6 +44,7 @@ APPEND_SOURCE_FILES(SOURCES HeatConduction)
 
 add_subdirectory(HeatTransportBHE)
 APPEND_SOURCE_FILES(SOURCES HeatTransportBHE)
+APPEND_SOURCE_FILES(SOURCES HeatTransportBHE/BHE)
 
 add_subdirectory(RichardsFlow)
 APPEND_SOURCE_FILES(SOURCES RichardsFlow)
