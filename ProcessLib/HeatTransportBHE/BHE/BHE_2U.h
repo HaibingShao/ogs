@@ -25,6 +25,10 @@ namespace BHE  // namespace of borehole heat exchanger
                BHE::BHE_BOUNDARY_TYPE bound_type    /* type of BHE boundary */,
                bool   if_use_ext_Ra_Rb            /* whether Ra and Rb values are used */,
                bool user_defined_R_vals           /* when user defined R values are used*/,
+               MathLib::PiecewiseLinearInterpolation const& my_bhe_heating_cop_curve      /* heating cop curve */,
+               MathLib::PiecewiseLinearInterpolation const& my_bhe_cooling_cop_curve      /* cooling cop curve */,
+               MathLib::PiecewiseLinearInterpolation const& my_flowrate_curve             /* flowrate curve */,
+               MathLib::PiecewiseLinearInterpolation const& my_power_curve                /* power curve*/,
                double my_L          = 100           /* length/depth of the BHE */,
                double my_D          = 0.013         /* diameter of the BHE */, 
                double my_Qr         = 21.86 / 86400 /* total refrigerant flow discharge of BHE */,
@@ -44,7 +48,6 @@ namespace BHE  // namespace of borehole heat exchanger
                double my_lambda_g   = 2.3           /* thermal conductivity of the grout */, 
                double my_omega      = 0.04242       /* pipe distance */,
                double my_power_in_watt = 0.0        /* injected or extracted power */,
-               std::size_t my_power_curve_idx = -1  /* index of the power curve*/,
                double my_delta_T_val = 0.0          /* Temperature difference btw inflow and outflow temperature */,
                double my_ext_Ra = 0.0               /* external defined borehole internal thermal resistance */,
                double my_ext_Rb = 0.0               /* external defined borehole thermal resistance */,
@@ -53,13 +56,10 @@ namespace BHE  // namespace of borehole heat exchanger
                double my_ext_Rgg1 = 0.0           /* external defined borehole thermal resistance */,
                double my_ext_Rgg2 = 0.0           /* external defined borehole thermal resistance */,
                double my_ext_Rgs = 0.0           /* external defined borehole thermal resistance */,
-               int my_bhe_heating_cop_curve_idx = -1      /* heating cop curve index */,
-               int my_bhe_cooling_cop_curve_idx = -1      /* cooling cop curve index */,
                bool if_flowrate_curve = false     /* whether flowrate curve is used*/,
-               int my_flowrate_curve_idx = -1     /* flow rate curve index*/,
                double my_threshold = 0.0            /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/,
                BHE_DISCHARGE_TYPE type = BHE::BHE_DISCHARGE_TYPE_PARALLEL) 
-               : BHEAbstract(BHE::BHE_TYPE_2U, name, bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, my_bhe_heating_cop_curve_idx, my_bhe_cooling_cop_curve_idx),
+               : BHEAbstract(BHE::BHE_TYPE_2U, name, my_bhe_heating_cop_curve, my_bhe_cooling_cop_curve, bound_type, if_use_ext_Ra_Rb, user_defined_R_vals ),
             _discharge_type(type)
         {
             _u = Eigen::Vector4d::Zero();
@@ -84,7 +84,7 @@ namespace BHE  // namespace of borehole heat exchanger
             lambda_g = my_lambda_g; 
             omega = my_omega; 
             power_in_watt_val = my_power_in_watt; 
-            power_in_watt_curve_idx = my_power_curve_idx;
+            power_in_watt_curve = my_power_curve;
             delta_T_val = my_delta_T_val; 
             threshold = my_threshold;
             if (if_use_ext_Ra_Rb)
@@ -105,7 +105,7 @@ namespace BHE  // namespace of borehole heat exchanger
             if (if_flowrate_curve)
             {
                 use_flowrate_curve = true;
-                flowrate_curve_idx = my_flowrate_curve_idx;
+                flowrate_curve = my_flowrate_curve;
             }
 
             S_i  = PI * 2.0 * r_outer;
@@ -243,7 +243,7 @@ namespace BHE  // namespace of borehole heat exchanger
         /**
           * return the shift index based on primary variable value
           */
-        int get_loc_shift_by_pv(FiniteElement::PrimaryVariable pv_name);
+        int get_loc_shift_by_pv(BHE::BHE_PRIMARY_VARS pv_name);
 
         /**
           * return the number of grout zones in this BHE.
