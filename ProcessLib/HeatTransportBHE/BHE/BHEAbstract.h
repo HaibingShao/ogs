@@ -91,7 +91,7 @@ namespace BHE  // namespace of borehole heat exchanger
           */
         BHEAbstract(BHE_TYPE my_type, 
             const std::string name, 
-            std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
+            std::map<std::string, std::shared_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
             BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUND_FIXED_INFLOW_TEMP, 
             bool if_use_ext_Ra_Rb = false, 
             bool user_defined_R_vals = false, 
@@ -105,10 +105,11 @@ namespace BHE  // namespace of borehole heat exchanger
                 bound_type(my_bound_type), 
                 use_ext_therm_resis(if_use_ext_Ra_Rb), 
                 user_defined_therm_resis(user_defined_R_vals), 
-                _heating_cop_curve(nullptr), 
-                _cooling_cop_curve(nullptr), 
-                _power_in_watt_curve(nullptr),
-                _flowrate_curve(nullptr),
+                /* _heating_cop_curve(nullptr), */
+                /* _cooling_cop_curve(nullptr), */
+                /* _power_in_watt_curve(nullptr), */
+                /* _flowrate_curve(nullptr), */
+                _bhe_curves(bhe_curves),
                 use_flowrate_curve(if_flowrate_curve)
         {};
 
@@ -475,24 +476,30 @@ namespace BHE  // namespace of borehole heat exchanger
         double ext_Rgs;
 
         /**
+          * map strucutre that contains all the curves related to this BHE
+          */
+        // std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation>> const& _bhe_curves;
+        std::map<std::string, std::shared_ptr<MathLib::PiecewiseLinearInterpolation>> const& _bhe_curves;
+
+        /**
           * power in watt curve
           */
-        std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _power_in_watt_curve;
+        std::weak_ptr<MathLib::PiecewiseLinearInterpolation> _power_in_watt_curve;
 
         /**
           * heating COP curve
           */
-        std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _heating_cop_curve;
+        std::weak_ptr<MathLib::PiecewiseLinearInterpolation> _heating_cop_curve;
 
         /**
           * cooling COP curve
           */
-        std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _cooling_cop_curve;
+        std::weak_ptr<MathLib::PiecewiseLinearInterpolation> _cooling_cop_curve;
 
         /**
           * refrigerant flow rate curve
           */
-        std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _flowrate_curve;
+        std::weak_ptr<MathLib::PiecewiseLinearInterpolation> _flowrate_curve;
 
         /**
           * use refrigerant flow rate curve
