@@ -432,7 +432,8 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
     case BHE_BOUND_POWER_IN_WATT:
         if (use_flowrate_curve)
         {
-            Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+            // Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+            Q_r_tmp = _flowrate_curve->getValue(current_time);
             update_flow_rate(Q_r_tmp);
         }
         else
@@ -442,14 +443,16 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
     case BHE_BOUND_FIXED_TEMP_DIFF: 
         if (use_flowrate_curve)
         {
-            Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+            // Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+            Q_r_tmp = _flowrate_curve->getValue(current_time);
             update_flow_rate(Q_r_tmp);
         }
         T_in = T_out + delta_T_val;
         break; 
     case BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT:
         // get the power value in the curve
-        power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
+        // power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
+        power_tmp = _power_in_watt_curve->getValue(current_time);
         if (power_tmp < 0)
             fac_dT = -1.0;
         else
@@ -480,11 +483,13 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
         break; 
     case BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT: 
         // get the building power value in the curve
-        building_power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid); 
+        // building_power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid); 
+        building_power_tmp = _power_in_watt_curve->getValue(current_time);
         if (building_power_tmp <= 0.0)
         {
             // get COP value based on T_out in the curve
-            COP_tmp = GetCurveValue(_heating_cop_curve_idx, 0, T_out, &flag_valid);
+            // COP_tmp = GetCurveValue(_heating_cop_curve_idx, 0, T_out, &flag_valid);
+            COP_tmp = _heating_cop_curve->getValue(T_out);
             // now calculate how much power needed from BHE
             power_tmp = building_power_tmp * (COP_tmp - 1.0) / COP_tmp;
             // also how much power from electricity
@@ -496,7 +501,8 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
         else
         {
             // get COP value based on T_out in the curve
-            COP_tmp = GetCurveValue(_cooling_cop_curve_idx, 0, T_out, &flag_valid);
+            // COP_tmp = GetCurveValue(_cooling_cop_curve_idx, 0, T_out, &flag_valid);
+            COP_tmp = _cooling_cop_curve->getValue(T_out);
             // now calculate how much power needed from BHE
             power_tmp = building_power_tmp * (COP_tmp + 1.0) / COP_tmp;
             // also how much power from electricity
@@ -531,11 +537,13 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
         break;
     case BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE:
         // get the building power value in the curve
-        building_power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
+        // building_power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
+        building_power_tmp = _power_in_watt_curve->getValue(current_time);
         if (building_power_tmp <= 0)
         {
             // get COP value based on T_out in the curve
-            COP_tmp = GetCurveValue(_heating_cop_curve_idx, 0, T_out, &flag_valid);
+            // COP_tmp = GetCurveValue(_heating_cop_curve_idx, 0, T_out, &flag_valid);
+            COP_tmp = _heating_cop_curve->getValue(T_out);
             // now calculate how much power needed from BHE
             power_tmp = building_power_tmp * (COP_tmp - 1.0) / COP_tmp;
             // also how much power from electricity
@@ -546,7 +554,8 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
         else
         {
             // get COP value based on T_out in the curve
-            COP_tmp = GetCurveValue(_cooling_cop_curve_idx, 0, T_out, &flag_valid);
+            // COP_tmp = GetCurveValue(_cooling_cop_curve_idx, 0, T_out, &flag_valid);
+            COP_tmp = _cooling_cop_curve->getValue(T_out);
             // now calculate how much power needed from BHE
             power_tmp = building_power_tmp * (COP_tmp + 1.0) / COP_tmp;
             // also how much power from electricity
@@ -557,7 +566,8 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
         // Assign Qr whether from curve or fixed value
         if (use_flowrate_curve)
         {
-            Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+            // Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+            Q_r_tmp = _flowrate_curve->getValue(current_time);
             update_flow_rate(Q_r_tmp);
         }
         else
@@ -584,11 +594,13 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
         break;
     case BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE: 
         // get the power value in the curve
-        power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
+        // power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
+        power_tmp = _power_in_watt_curve->getValue(current_time);
         // Assign Qr whether from curve or fixed value
         if (use_flowrate_curve)
         {
-            Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+            // Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+            Q_r_tmp = _flowrate_curve->getValue(current_time);
             update_flow_rate(Q_r_tmp);
         }
         else

@@ -8,6 +8,7 @@
 */
 
 #include "BHE_Net_ELE_HeatPump.h"
+#include "ProcessLib/Utils/ProcessUtils.h"
 
 using namespace BHE;
 
@@ -37,8 +38,9 @@ double BHE_Net_ELE_HeatPump::set_BC(double T_in, double current_time)
 		if (_power_curve_idx <= 0)
 			power_hp = _power_val;
 		else
-			power_hp = GetCurveValue(_power_curve_idx, 0, current_time, &flag_valid);
-		COP = GetCurveValue(_cop_curve_idx, 0, T_in, &flag_valid);
+			power_hp = _power_curve->getValue(current_time);
+
+		COP = _cop_curve->getValue(T_in);
 		power_bhe = power_hp * (COP - 1.0) / COP;
 		// also how much power from electricity
 		power_el = power_hp - power_bhe;
@@ -51,8 +53,11 @@ double BHE_Net_ELE_HeatPump::set_BC(double T_in, double current_time)
 			delta_T = -power_bhe / rho_cp_u;
 			T_out = T_in - delta_T;
 		}
-		std::cout << "heat pump: " << this->get_ele_name() << ", T_in: " << T_in << ", T_out: " << T_out << std::endl;
-		std::cout << "COP: " << COP << ", Q_bhe: " << power_bhe << ", Q_elect: " << power_el << std::endl;
+		
+        // std::cout << "heat pump: " << this->get_ele_name() << ", T_in: " << T_in << ", T_out: " << T_out << std::endl;
+		// std::cout << "COP: " << COP << ", Q_bhe: " << power_bhe << ", Q_elect: " << power_el << std::endl;
+        DBUG("Heat pump: \'%s\', T_in: %.2d, T_out: %.2d. \n", this->get_ele_name(), T_in, T_out );
+        DBUG("COP: %.2d, Q_bhe: %.2d, Q_electricity: %.2d. \n", COP, power_bhe, power_el);
 		break;
 	}
 
