@@ -58,16 +58,6 @@ public:
 		_flowrate = flowrate;
 	}
 
-	void set_power_curve_idx(int power_curve_idx)
-	{
-		_power_curve_idx = power_curve_idx;
-	}
-
-	void set_cop_curve_idx(int cop_curve_idx)
-	{
-		_cop_curve_idx = cop_curve_idx;
-	}
-
 	void set_fluid_density(double density)
 	{
 		_fluid_density = density;
@@ -87,8 +77,8 @@ private:
 
 	double _power_val;
 	double _flowrate;
-	int _power_curve_idx;
-	int _cop_curve_idx;
+    std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _power_curve;
+    std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _cop_curve;
 	double _fluid_density;
 	double _fluid_heat_capacity;
 
