@@ -11,7 +11,8 @@
 #define BHE_NET_ELE_ABSTRACT_H
 
 #include "Eigen/Eigen"
-#include <vector>
+#include "ProcessLib/Utils/ProcessUtils.h"
+#include "MathLib/InterpolationAlgorithms/PiecewiseLinearInterpolation.h"
 
 using namespace std;
 

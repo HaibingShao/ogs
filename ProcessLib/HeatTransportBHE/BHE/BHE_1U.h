@@ -25,10 +25,9 @@ namespace BHE  // namespace of borehole heat exchanger
                BHE::BHE_BOUNDARY_TYPE bound_type  /* type of BHE boundary */,
                bool   if_use_ext_Ra_Rb            /* whether Ra and Rb values are used */,
                bool user_defined_R_vals           /* when user defined R values are used*/,
-               MathLib::PiecewiseLinearInterpolation const& my_bhe_heating_cop_curve      /* heating cop curve */,
-               MathLib::PiecewiseLinearInterpolation const& my_bhe_cooling_cop_curve      /* cooling cop curve */,
-               MathLib::PiecewiseLinearInterpolation const& my_flowrate_curve             /* flowrate curve */,
-               MathLib::PiecewiseLinearInterpolation const& my_power_curve                /* power curve*/,
+               std::map<std::string, 
+                        std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> 
+                        const& bhe_curves         /* bhe related curves */,
                double my_L = 100                  /* length/depth of the BHE */,
                double my_D = 0.013                /* diameter of the BHE */,
                double my_Qr = 21.86 / 86400       /* total refrigerant flow discharge of BHE */,
@@ -58,7 +57,7 @@ namespace BHE  // namespace of borehole heat exchanger
                double my_ext_Rgs = 0.0            /* external defined borehole thermal resistance */,
                bool if_flowrate_curve = false     /* whether flowrate curve is used*/,
                double my_threshold = 0.1)         /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/
-               : BHEAbstract(BHE::BHE_TYPE_1U, name, my_bhe_heating_cop_curve, my_bhe_cooling_cop_curve, bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve)
+               : BHEAbstract(BHE::BHE_TYPE_1U, name, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve)
         {
             _u = Eigen::Vector2d::Zero();
             _Nu =Eigen::Vector2d::Zero();
@@ -82,7 +81,8 @@ namespace BHE  // namespace of borehole heat exchanger
             lambda_g = my_lambda_g;
             omega = my_omega;
             power_in_watt_val = my_power_in_watt; 
-            power_in_watt_curve = my_power_curve; 
+            // TODO: get the curves right
+            _power_in_watt_curve = my_power_curve; 
             delta_T_val = my_delta_T_val;
             threshold = my_threshold;
             if (if_use_ext_Ra_Rb)
@@ -103,7 +103,7 @@ namespace BHE  // namespace of borehole heat exchanger
             if (if_flowrate_curve)
             {
                 use_flowrate_curve = true;
-                flowrate_curve = my_flowrate_curve;
+                _flowrate_curve = my_flowrate_curve;
             }
 
             // Table 1 in Diersch_2011_CG
@@ -156,7 +156,8 @@ namespace BHE  // namespace of borehole heat exchanger
             if (use_flowrate_curve)
             {
                 int flag_valid = false;
-                double Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+                // double Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
+                double Q_r_tmp = _flowrate_curve->getValue(current_time);
                 update_flow_rate(Q_r_tmp);
             }
         };

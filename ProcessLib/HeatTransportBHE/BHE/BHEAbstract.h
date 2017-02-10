@@ -30,10 +30,10 @@
 #define BHE_ABSTRACT_H
 
 #include <iostream>
-#include "Eigen/Eigen"
-//#include "../GEO/Polyline.h"
 #include "BHE_Net_ELE_Abstract.h"
 #include "MathLib/InterpolationAlgorithms/PiecewiseLinearInterpolation.h"
+#include "GeoLib/Polyline.h"
+
 
 namespace BHE  // namespace of borehole heat exchanger
 {
@@ -91,8 +91,7 @@ namespace BHE  // namespace of borehole heat exchanger
           */
         BHEAbstract(BHE_TYPE my_type, 
             const std::string name, 
-            MathLib::PiecewiseLinearInterpolation const& bhe_heating_cop_curve,
-            MathLib::PiecewiseLinearInterpolation const& bhe_cooling_cop_curve,
+            std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
             BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUND_FIXED_INFLOW_TEMP, 
             bool if_use_ext_Ra_Rb = false, 
             bool user_defined_R_vals = false, 
@@ -106,8 +105,10 @@ namespace BHE  // namespace of borehole heat exchanger
                 bound_type(my_bound_type), 
                 use_ext_therm_resis(if_use_ext_Ra_Rb), 
                 user_defined_therm_resis(user_defined_R_vals), 
-                _heating_cop_curve(bhe_heating_cop_curve), 
-                _cooling_cop_curve(bhe_cooling_cop_curve), 
+                _heating_cop_curve(nullptr), 
+                _cooling_cop_curve(nullptr), 
+                _power_in_watt_curve(nullptr),
+                _flowrate_curve(nullptr),
                 use_flowrate_curve(if_flowrate_curve)
         {};
 
@@ -286,24 +287,24 @@ namespace BHE  // namespace of borehole heat exchanger
           * get the polyline geometry 
           * that is representing this BHE. 
           */
-        const GEOLIB::Polyline* get_geo_ply() { return _geo_ply; }
+        const GeoLib::Polyline* get_geo_ply() { return _geo_ply; }
 
         /**
           * set the polyline geometry
           * that is representing this BHE.
           */
-        void set_geo_ply(const GEOLIB::Polyline* ply) { _geo_ply = ply; }
+        void set_geo_ply(const GeoLib::Polyline* ply) { _geo_ply = ply; }
 
         /**
-        * set the polyline geometry
-        * that is representing this BHE.
-        */
+          * set the polyline geometry
+          * that is representing this BHE.
+          */
         void set_ply_eps(double eps) { _ply_eps = eps; }
 
         /**
-        * set the polyline geometry
-        * that is representing this BHE.
-        */
+          * set the polyline geometry
+          * that is representing this BHE.
+          */
         double get_ply_eps(void) { return _ply_eps; }
 
         /**
@@ -417,11 +418,6 @@ namespace BHE  // namespace of borehole heat exchanger
         double power_in_watt_val; 
 
         /**
-          * power in watt curve
-          */
-        MathLib::PiecewiseLinearInterpolation & power_in_watt_curve;
-
-        /**
           * temperature difference between inflow and 
           * outflow pipelines
           */
@@ -449,55 +445,60 @@ namespace BHE  // namespace of borehole heat exchanger
         double ext_Rb; 
 
         /**
-        * whether or not using user defined borehole thermal resistance Rfig, Rfog, Rgg, Rgs
-        */
+          * whether or not using user defined borehole thermal resistance Rfig, Rfog, Rgg, Rgs
+          */
         bool user_defined_therm_resis;
 
         /**
-        * external given borehole internal thermal resistance value
-        */
+          * external given borehole internal thermal resistance value
+          */
         double ext_Rfig;
 
         /**
-        * external given borehole internal thermal resistance value
-        */
+          * external given borehole internal thermal resistance value
+          */
         double ext_Rfog;
 
         /**
-        * external given borehole internal thermal resistance value
-        */
+          * external given borehole internal thermal resistance value
+          */
         double ext_Rgg1;
 
         /**
-        * external given borehole internal thermal resistance value
-        */
+          * external given borehole internal thermal resistance value
+          */
         double ext_Rgg2;
 
         /**
-        * external given borehole internal thermal resistance value
-        */
+          * external given borehole internal thermal resistance value
+          */
         double ext_Rgs;
 
         /**
-        * heating COP curve
-        */
-        MathLib::PiecewiseLinearInterpolation const& _heating_cop_curve;
+          * power in watt curve
+          */
+        std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _power_in_watt_curve;
 
         /**
-        * cooling COP curve
-        */
-        MathLib::PiecewiseLinearInterpolation const& _cooling_cop_curve;
+          * heating COP curve
+          */
+        std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _heating_cop_curve;
 
         /**
-        * use refrigerant flow rate curve
-        */
+          * cooling COP curve
+          */
+        std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _cooling_cop_curve;
+
+        /**
+          * refrigerant flow rate curve
+          */
+        std::unique_ptr<MathLib::PiecewiseLinearInterpolation> _flowrate_curve;
+
+        /**
+          * use refrigerant flow rate curve
+          */
         bool use_flowrate_curve;
-
-        /**
-        * refrigerant flow rate curve
-        */
-        MathLib::PiecewiseLinearInterpolation & flowrate_curve;
-
+        
         /**
           * for BHEs, the RHS value is zero 
           */
@@ -521,7 +522,7 @@ namespace BHE  // namespace of borehole heat exchanger
         /**
           * the polyline geometry representing the BHE
           */
-        const GEOLIB::Polyline* _geo_ply;
+        const GeoLib::Polyline* _geo_ply;
 
         /**
           * name of the borehole heat exchanger
