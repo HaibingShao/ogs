@@ -35,11 +35,14 @@ double BHE_Net_ELE_HeatPump::set_BC(double T_in, double current_time)
 	case HEAT_PUMP_BOUND_POWER_FIXED_FLOWRATE:
 		double rho_cp_u = _fluid_density * _fluid_heat_capacity * _flowrate;
 
+        /*
 		if (_power_curve_idx <= 0)
 			power_hp = _power_val;
 		else
 			power_hp = _power_curve->getValue(current_time);
+        */
 
+        power_hp = _power_val;
 		COP = _cop_curve->getValue(T_in);
 		power_bhe = power_hp * (COP - 1.0) / COP;
 		// also how much power from electricity
