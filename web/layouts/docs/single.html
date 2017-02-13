@@ -1,0 +1,41 @@
+{{ partial "header.html" . }}
+  <div class="col-xs-3">
+    {{ $segments := split .RelPermalink "/" }}
+    {{ $subsection := index $segments 2 }}
+    <ul>
+    {{ range .Site.Pages.ByWeight }}
+      {{ if eq .Type "docs"}}
+        {{ $localSegments := split .RelPermalink "/" }}
+        {{ $localSubsection := index $localSegments 2 }}
+        {{ if eq $localSubsection $subsection  }}
+          <li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+        {{ end }}
+      {{ end }}
+    {{ end }}
+    <ul>
+  </div>
+  <div class="col-xs-9">
+    <h1>{{ .Title }}</h1>
+
+    {{ .Content }}
+
+    <hr>
+    <div class="row between-xs">
+      <div class="col-xs-4">
+      {{ if isset .Params "back" }}
+        <a href='{{ relref . .Params.back }}'>Back: {{ .Params.back }}</a>
+      {{ end }}
+      </div>
+
+      <div class="col-xs-4" style="text-align: right">
+      {{ if isset .Params "next" }}
+        <a href='{{ relref . .Params.next }}'>Next: {{ .Params.next }}</a>
+      {{ end }}
+      </div>
+    </div>
+
+    <p>This article was written by {{ .Params.Author }}. If you are missing something or you find an error please <a href="mailto:ogs-devs@googlegroups.com">let us know</a>.</p>
+  </div>
+
+
+{{ partial "footer.html" . }}

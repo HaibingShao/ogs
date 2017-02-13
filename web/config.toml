@@ -1,0 +1,13 @@
+languageCode = "en-us"
+title = "OpenGeoSys-6"
+theme = "ogs"
+baseURL = "http://localhost:1313"
+buildDrafts = true
+pygmentsstyle = 'friendly'
+enableGitInfo = true
+
+[params.sharingicons]
+   hide = true
+
+[taxonomies]
+news = "news"
