@@ -13,6 +13,7 @@
 #include "ProcessLib/Utils/ProcessUtils.h"
 #include "HeatTransportBHEProcess.h"
 #include "HeatTransportBHEProcessData.h"
+#include "BHE/BHEAbstract.h"
 
 namespace ProcessLib
 {
@@ -115,6 +116,44 @@ namespace ProcessLib
                 "density_gas", parameters, 1);
 
             DBUG("Use \'%s\' as gas phase density parameter.", density_gas.name.c_str());
+
+            // reading BHE parameters--------------------------------------------------------------
+            std::vector<std::unique_ptr<BHE::BHEAbstract*>> vec_BHEs;
+            auto const& bhe_configs =
+                //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__borehole_heat_exchangers}
+                config.getConfigSubtree("borehole_heat_exchangers");
+
+            for (
+                auto const& bhe_conf :
+                //! \ogs_file_param{prj__processes__process___HEAT_TRANSPORT_BHE__borehole_heat_exchangers__borehole_heat_exchanger}
+                bhe_configs.getConfigSubtreeList("borehole_heat_exchanger"))
+            {
+                auto const bhe_id = bhe_conf.getConfigAttribute<int>("id");
+                
+                // read in the parameters
+                using namespace BHE; 
+                const std::string bhe_ply_name = bhe_conf.getConfigParameter<std::string>("bhe_polyline"); 
+                const std::string bhe_type = bhe_conf.getConfigParameter<std::string>("bhe_type");
+                const double bhe_length = bhe_conf.getConfigParameter<double>("bhe_length");
+                const double bhe_diameter = bhe_conf.getConfigParameter<double>("bhe_diameter");
+                const double bhe_refrigerant_flow_rate = bhe_conf.getConfigParameter<double>("bhe_refrigerant_flow_rate");
+                const double bhe_pipe_inner_radius = bhe_conf.getConfigParameter<double>("bhe_pipe_inner_radius");
+                const double bhe_pipe_outer_radius = bhe_conf.getConfigParameter<double>("bhe_pipe_outer_radius");
+                const double bhe_pipe_in_wall_thickness = bhe_conf.getConfigParameter<double>("bhe_pipe_in_wall_thickness");
+                const double bhe_pipe_out_wall_thickness = bhe_conf.getConfigParameter<double>("bhe_pipe_out_wall_thickness");
+                const std::size_t bhe_fluid_idx = bhe_conf.getConfigParameter<std::size_t>("bhe_fluid_idx");
+                const double bhe_fluid_longitudinal_dispsion_length = bhe_conf.getConfigParameter<double>("bhe_fluid_longitudinal_dispsion_length");
+                const double bhe_grout_density = bhe_conf.getConfigParameter<double>("bhe_grout_density");
+                const double bhe_grout_porosity = bhe_conf.getConfigParameter<double>("bhe_grout_porosity");
+                const double bhe_grout_heat_capacity = bhe_conf.getConfigParameter<double>("bhe_grout_heat_capacity");
+                const double bhe_pipe_wall_thermal_conductivity = bhe_conf.getConfigParameter<double>("bhe_pipe_wall_thermal_conductivity");
+                const double bhe_grout_thermal_conductivity = bhe_conf.getConfigParameter<double>("bhe_grout_thermal_conductivity");
+                const double bhe_pipe_distance = bhe_conf.getConfigParameter<double>("bhe_pipe_distance");
+
+                // TODO: initialize the BHE class
+
+            }
+            // end of reading BHE parameters-------------------------------------------------------
 
             HeatTransportBHEProcessData process_data{ thermal_conductivity_solid, 
                 thermal_conductivity_fluid, 
