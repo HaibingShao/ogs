@@ -197,7 +197,8 @@ namespace ProcessLib
             HeatTransportBHEProcessData const& _process_data;
 
             IntegrationMethod const _integration_method;
-            std::vector<ShapeMatrices> _shape_matrices;
+            std::vector<ShapeMatrices, Eigen::aligned_allocator<ShapeMatrices>>
+                _shape_matrices;
 
             std::vector<std::vector<double>> _heat_fluxes;
         };
