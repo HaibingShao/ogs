@@ -84,17 +84,21 @@ namespace BHE  // namespace of borehole heat exchanger
 
             // get the corresponding curve 
             std::map<std::string, std::shared_ptr<MathLib::PiecewiseLinearInterpolation>>::const_iterator it;
-            it = _bhe_curves.find("power_in_watt_curve");
-            if (it != _bhe_curves.end())
+            if (bound_type == BHE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT ||
+                bound_type == BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE)
             {
-                // curve successfully found
-                _power_in_watt_curve = it->second;
-            }
-            else
-            {
-                // curve not found
-                ERR("Required pow_in_watt_curve cannot be found in the BHE parameters!");
-                abort();
+                it = _bhe_curves.find("power_in_watt_curve");
+                if (it != _bhe_curves.end())
+                {
+                    // curve successfully found
+                    _power_in_watt_curve = it->second;
+                }
+                else
+                {
+                    // curve not found
+                    ERR("Required pow_in_watt_curve cannot be found in the BHE parameters!");
+                    abort();
+                }
             }
 
             if (if_use_ext_Ra_Rb)
