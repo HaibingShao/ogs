@@ -16,6 +16,12 @@
 #include "BHE/BHEAbstract.h"
 #include "BHE/BHE_1U.h"
 #include "BHE/BHE_Net.h"
+#include "MaterialLib/Fluid/FluidProperty.h"
+#include "MaterialLib/Fluid/Density/createFluidDensityModel.h"
+#include "MaterialLib/Fluid/Viscosity/createViscosityModel.h"
+#include "MaterialLib/Fluid/SpecificHeatCapacity/CreateSpecificFluidHeatCapacityModel.h"
+#include "MaterialLib/Fluid/ThermalConductivity/CreateFluidThermalConductivityModel.h"
+#include "BaseLib/reorderVector.h"
 
 namespace ProcessLib
 {
@@ -210,9 +216,6 @@ namespace ProcessLib
                     }
                 }
 
-
-
-
                 // convert BHE type
                 BHE::BHE_TYPE bhe_type; 
                 if (bhe_type_str.compare("BHE_TYPE_1U") == 0)
@@ -263,12 +266,30 @@ namespace ProcessLib
                 }
 
                 // TODO: get the refrigerant properties from fluid property class
-                const double bhe_refrigerant_density = 1000.0; 
-                const double bhe_refrigerant_viscosity = 1.0e-3; 
-                const double bhe_refrigerant_heat_capacity = 4200;
-                const double bhe_regrigerant_heat_conductivity = 2.5; 
+                //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__material_property__fluid}
+                auto const& fluid_config = config.getConfigSubtree("fluid");
+                //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__material_property__refrigerant_density}
+                auto const& rho_conf = fluid_config.getConfigSubtree("refrigerant_density");
+                auto bhe_refrigerant_density =
+                    MaterialLib::Fluid::createFluidDensityModel(rho_conf);
+                //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__material_property__refrigerant_viscosity}
+                auto const& mu_conf = fluid_config.getConfigSubtree("refrigerant_viscosity");
+                auto bhe_refrigerant_viscosity =
+                    MaterialLib::Fluid::createViscosityModel(mu_conf);
+                //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__material_property__refrigerant_specific_heat_capacity}
+                auto const& cp_conf = fluid_config.getConfigSubtree("refrigerant_specific_heat_capacity");
+                auto bhe_refrigerant_heat_capacity =
+                    MaterialLib::Fluid::createSpecificFluidHeatCapacityModel(cp_conf);
+                //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__material_property__refrigerant_thermal_conductivity}
+                auto const& lambda_conf = fluid_config.getConfigSubtree("refrigerant_thermal_conductivity");
+                auto bhe_regrigerant_heat_conductivity =
+                    MaterialLib::Fluid::createFluidThermalConductivityModel(lambda_conf);
 
-                // TODO: initialize the BHE class
+                MaterialLib::Fluid::FluidProperty::ArrayType vars; 
+                vars[static_cast<int>(MaterialLib::Fluid::PropertyVariableType::T)] = 298.15;
+                vars[static_cast<int>(MaterialLib::Fluid::PropertyVariableType::p)] = 101325.0;
+
+                // initialize the BHE class
                 switch (bhe_type)
                 {
                 case BHE::BHE_TYPE_1U:
@@ -277,9 +298,9 @@ namespace ProcessLib
                         bhe_user_defined_therm_resis, bhe_curves, bhe_length, 
                         bhe_diameter, bhe_refrigerant_flow_rate, bhe_pipe_inner_radius, 
                         bhe_pipe_outer_radius, bhe_pipe_in_wall_thickness, bhe_pipe_out_wall_thickness, 
-                        bhe_refrigerant_viscosity, bhe_refrigerant_density, bhe_fluid_longitudinal_dispsion_length,
-                        bhe_refrigerant_heat_capacity, bhe_grout_density, bhe_grout_porosity, 
-                        bhe_grout_heat_capacity, bhe_regrigerant_heat_conductivity, bhe_pipe_wall_thermal_conductivity, 
+                        bhe_refrigerant_viscosity->getValue(vars), bhe_refrigerant_density->getValue(vars), bhe_fluid_longitudinal_dispsion_length,
+                        bhe_refrigerant_heat_capacity->getValue(vars), bhe_grout_density, bhe_grout_porosity, 
+                        bhe_grout_heat_capacity, bhe_regrigerant_heat_conductivity->getValue(vars), bhe_pipe_wall_thermal_conductivity, 
                         bhe_grout_thermal_conductivity, bhe_pipe_distance, bhe_power_in_watt_val, 
                         bhe_delta_T_val, bhe_intern_resistance, bhe_therm_resistance,
                         bhe_R_fig, bhe_R_fog, bhe_R_gg1,
@@ -300,10 +321,13 @@ namespace ProcessLib
 
                     break;
                 case BHE::BHE_TYPE_2U:
+                    // TODO
                     break; 
                 case BHE::BHE_TYPE_CXA:
+                    // TODO
                     break; 
                 case BHE::BHE_TYPE_CXC:
+                    // TODO
                     break;
                 }
 
