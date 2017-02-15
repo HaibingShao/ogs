@@ -30,6 +30,7 @@
 #define BHE_ABSTRACT_H
 
 #include <iostream>
+#include "boost/math/constants/constants.hpp"
 #include "BHE_Net_ELE_Abstract.h"
 #include "MathLib/InterpolationAlgorithms/PiecewiseLinearInterpolation.h"
 #include "GeoLib/Polyline.h"
@@ -81,7 +82,8 @@ namespace BHE  // namespace of borehole heat exchanger
         BHE_DISCHARGE_TYPE_SERIAL       // serial discharge
     };
 
-    const double PI = 3.14159265358979323846264338327950288419716939937510582;
+    using namespace boost::math::constants;
+    const double PI = boost::math::constants::pi<double>(); 
 
     class BHEAbstract : public BHE_Net_ELE_Abstract
     {
