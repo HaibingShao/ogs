@@ -265,7 +265,7 @@ namespace ProcessLib
                     bhe_delta_T_val = bhe_conf.getConfigParameterOptional<double>("bhe_inout_delta_T_value").get();
                 }
 
-                // TODO: get the refrigerant properties from fluid property class
+                // get the refrigerant properties from fluid property class
                 //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__material_property__fluid}
                 auto const& fluid_config = config.getConfigSubtree("fluid");
                 //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__material_property__refrigerant_density}
