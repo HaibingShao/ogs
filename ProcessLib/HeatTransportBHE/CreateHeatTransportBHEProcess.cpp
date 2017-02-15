@@ -14,6 +14,8 @@
 #include "HeatTransportBHEProcess.h"
 #include "HeatTransportBHEProcessData.h"
 #include "BHE/BHEAbstract.h"
+#include "BHE/BHE_1U.h"
+#include "BHE/BHE_Net.h"
 
 namespace ProcessLib
 {
@@ -118,7 +120,13 @@ namespace ProcessLib
             DBUG("Use \'%s\' as gas phase density parameter.", density_gas.name.c_str());
 
             // reading BHE parameters--------------------------------------------------------------
-            std::vector<std::unique_ptr<BHE::BHEAbstract*>> vec_BHEs;
+            std::vector<BHE::BHEAbstract*> vec_BHEs;
+            BHE::BHE_Net BHE_network;
+            std::map<std::string, std::shared_ptr<MathLib::PiecewiseLinearInterpolation>> bhe_curves;
+
+            // TODO: read the bhe_curves
+
+            // now read the BHE configurations
             auto const& bhe_configs =
                 //! \ogs_file_param{prj__processes__process__HEAT_TRANSPORT_BHE__borehole_heat_exchangers}
                 config.getConfigSubtree("borehole_heat_exchangers");
@@ -132,8 +140,10 @@ namespace ProcessLib
                 
                 // read in the parameters
                 using namespace BHE; 
-                const std::string bhe_ply_name = bhe_conf.getConfigParameter<std::string>("bhe_polyline"); 
-                const std::string bhe_type = bhe_conf.getConfigParameter<std::string>("bhe_type");
+                const std::string bhe_type_str = bhe_conf.getConfigParameter<std::string>("bhe_type");
+                const std::string bhe_ply_name = bhe_conf.getConfigParameter<std::string>("bhe_polyline");
+                const std::string bhe_bound_type_str = bhe_conf.getConfigParameter<std::string>("bhe_bound_type");
+                const bool bhe_if_use_flow_rate_curve = false; 
                 const double bhe_length = bhe_conf.getConfigParameter<double>("bhe_length");
                 const double bhe_diameter = bhe_conf.getConfigParameter<double>("bhe_diameter");
                 const double bhe_refrigerant_flow_rate = bhe_conf.getConfigParameter<double>("bhe_refrigerant_flow_rate");
@@ -142,7 +152,7 @@ namespace ProcessLib
                 const double bhe_pipe_in_wall_thickness = bhe_conf.getConfigParameter<double>("bhe_pipe_in_wall_thickness");
                 const double bhe_pipe_out_wall_thickness = bhe_conf.getConfigParameter<double>("bhe_pipe_out_wall_thickness");
                 const std::size_t bhe_fluid_idx = bhe_conf.getConfigParameter<std::size_t>("bhe_fluid_idx");
-                const double bhe_fluid_longitudinal_dispsion_length = bhe_conf.getConfigParameter<double>("bhe_fluid_longitudinal_dispsion_length");
+                const double bhe_fluid_longitudinal_dispsion_length = bhe_conf.getConfigParameter<double>("bhe_fluid_longitudinal_dispsion_length"); 
                 const double bhe_grout_density = bhe_conf.getConfigParameter<double>("bhe_grout_density");
                 const double bhe_grout_porosity = bhe_conf.getConfigParameter<double>("bhe_grout_porosity");
                 const double bhe_grout_heat_capacity = bhe_conf.getConfigParameter<double>("bhe_grout_heat_capacity");
@@ -150,7 +160,152 @@ namespace ProcessLib
                 const double bhe_grout_thermal_conductivity = bhe_conf.getConfigParameter<double>("bhe_grout_thermal_conductivity");
                 const double bhe_pipe_distance = bhe_conf.getConfigParameter<double>("bhe_pipe_distance");
 
+                // optional parameters
+                double bhe_power_in_watt_val;
+                double bhe_intern_resistance; 
+                double bhe_therm_resistance; 
+                double bhe_R_fig; 
+                double bhe_R_fog; 
+                double bhe_R_gg1; 
+                double bhe_R_gg2; 
+                double bhe_R_gs; 
+                double bhe_delta_T_val; 
+                double bhe_switch_off_threshold; 
+
+                // give default values to optional parameters
+                // if the BHE is using external given thermal resistance values
+                bool bhe_use_ext_therm_resis = false;
+                if (auto const bhe_use_ext_therm_resis_conf =
+                    config.getConfigParameterOptional<bool>("bhe_use_external_therm_resis"))
+                {
+                    DBUG("If using external given thermal resistance values : %s",
+                        (*bhe_use_ext_therm_resis_conf) ? "true" : "false");
+                    bhe_use_ext_therm_resis = *bhe_use_ext_therm_resis_conf;
+
+                    // only when using it, read the two resistance values
+                    if (bhe_use_ext_therm_resis)
+                    {
+                        bhe_intern_resistance = bhe_conf.getConfigParameterOptional<double>("bhe_internal_resistance").get();
+                        bhe_therm_resistance = bhe_conf.getConfigParameterOptional<double>("bhe_therm_resistance").get();
+                    }
+                }
+
+                // if the BHE is using user defined thermal resistance values
+                bool bhe_user_defined_therm_resis = false; 
+                if (auto const bhe_user_defined_therm_resis_conf =
+                    config.getConfigParameterOptional<bool>("bhe_user_defined_therm_resis"))
+                {
+                    DBUG("If appplying user defined thermal resistance values : %s",
+                        (*bhe_user_defined_therm_resis_conf) ? "true" : "false");
+                    bhe_user_defined_therm_resis = *bhe_user_defined_therm_resis_conf;
+
+                    // only when using it, read the two resistance values
+                    if (bhe_user_defined_therm_resis)
+                    {
+                        bhe_R_fig = bhe_conf.getConfigParameterOptional<double>("bhe_R_fig").get();
+                        bhe_R_fog = bhe_conf.getConfigParameterOptional<double>("bhe_R_fog").get();
+                        bhe_R_gg1 = bhe_conf.getConfigParameterOptional<double>("bhe_R_gg1").get();
+                        bhe_R_gg2 = bhe_conf.getConfigParameterOptional<double>("bhe_R_gg2").get();
+                        bhe_R_gs = bhe_conf.getConfigParameterOptional<double>("bhe_R_gs").get();
+                    }
+                }
+
+
+
+
+                // convert BHE type
+                BHE::BHE_TYPE bhe_type; 
+                if (bhe_type_str.compare("BHE_TYPE_1U") == 0)
+                    bhe_type = BHE::BHE_TYPE_1U;
+                else if (bhe_type_str.compare("BHE_TYPE_2U") == 0)
+                    bhe_type = BHE::BHE_TYPE_2U;
+                else if (bhe_type_str.compare("BHE_TYPE_CXC") == 0)
+                    bhe_type = BHE::BHE_TYPE_CXC;
+                else if (bhe_type_str.compare("BHE_TYPE_CXA") == 0)
+                    bhe_type = BHE::BHE_TYPE_CXA;
+
+                // convert BHE boundary type
+                BHE::BHE_BOUNDARY_TYPE bhe_bound_type; 
+                if (bhe_bound_type_str.compare("FIXED_INFLOW_TEMP") == 0)
+                    bhe_bound_type = BHE::BHE_BOUND_FIXED_INFLOW_TEMP;
+                else if (bhe_bound_type_str.compare("FIXED_INFLOW_TEMP_CURVE") == 0)
+                    bhe_bound_type = BHE::BHE_BOUND_FIXED_INFLOW_TEMP_CURVE;
+                else if (bhe_bound_type_str.compare("POWER_IN_WATT") == 0)
+                {
+                    bhe_bound_type = BHE::BHE_BOUND_POWER_IN_WATT;
+                    bhe_power_in_watt_val = bhe_conf.getConfigParameterOptional<double>("bhe_power_in_watt_value").get();
+                    bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
+                }
+                else if (bhe_bound_type_str.compare("POWER_IN_WATT_CURVE_FIXED_DT") == 0)
+                {
+                    bhe_bound_type = BHE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT;
+                    bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
+                }
+                else if (bhe_bound_type_str.compare("BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT") == 0)
+                {
+                    bhe_bound_type = BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT;
+                    bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
+                }
+                else if (bhe_bound_type_str.compare("BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE") == 0)
+                {
+                    bhe_bound_type = BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE;
+                    bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
+                }
+                else if (bhe_bound_type_str.compare("POWER_IN_WATT_CURVE_FIXED_FLOW_RATE") == 0)
+                {
+                    bhe_bound_type = BHE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE;
+                    bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
+                }
+                else if (bhe_bound_type_str.compare("FIXED_TEMP_DIFF") == 0)
+                {
+                    bhe_bound_type = BHE::BHE_BOUND_FIXED_TEMP_DIFF;
+                    bhe_delta_T_val = bhe_conf.getConfigParameterOptional<double>("bhe_inout_delta_T_value").get();
+                }
+
+                // TODO: get the refrigerant properties from fluid property class
+                const double bhe_refrigerant_density = 1000.0; 
+                const double bhe_refrigerant_viscosity = 1.0e-3; 
+                const double bhe_refrigerant_heat_capacity = 4200;
+                const double bhe_regrigerant_heat_conductivity = 2.5; 
+
                 // TODO: initialize the BHE class
+                switch (bhe_type)
+                {
+                case BHE::BHE_TYPE_1U:
+                    BHE::BHE_1U * m_bhe_1u; 
+                    m_bhe_1u = new BHE::BHE_1U(bhe_ply_name, bhe_bound_type, bhe_use_ext_therm_resis,
+                        bhe_user_defined_therm_resis, bhe_curves, bhe_length, 
+                        bhe_diameter, bhe_refrigerant_flow_rate, bhe_pipe_inner_radius, 
+                        bhe_pipe_outer_radius, bhe_pipe_in_wall_thickness, bhe_pipe_out_wall_thickness, 
+                        bhe_refrigerant_viscosity, bhe_refrigerant_density, bhe_fluid_longitudinal_dispsion_length,
+                        bhe_refrigerant_heat_capacity, bhe_grout_density, bhe_grout_porosity, 
+                        bhe_grout_heat_capacity, bhe_regrigerant_heat_conductivity, bhe_pipe_wall_thermal_conductivity, 
+                        bhe_grout_thermal_conductivity, bhe_pipe_distance, bhe_power_in_watt_val, 
+                        bhe_delta_T_val, bhe_intern_resistance, bhe_therm_resistance,
+                        bhe_R_fig, bhe_R_fog, bhe_R_gg1,
+                        bhe_R_gg2, bhe_R_gs, bhe_if_use_flow_rate_curve, 
+                        bhe_switch_off_threshold);
+
+                    vec_BHEs.push_back(m_bhe_1u);
+                    BHE_network.add_bhe_net_elem(m_bhe_1u);
+
+                    // now adding a pipeline connecting the bottom of this BHE
+                    BHE::BHE_Net_ELE_Pipe_Inner_1U * m_bhe_pipe_1u;
+                    m_bhe_pipe_1u = new BHE::BHE_Net_ELE_Pipe_Inner_1U(m_bhe_1u->get_ele_name().append("_INNER_PIPE"), m_bhe_1u);
+                    BHE_network.add_bhe_net_pipe(m_bhe_pipe_1u,
+                        m_bhe_1u->get_ele_name(),
+                        0,
+                        m_bhe_1u->get_ele_name(),
+                        0);
+
+                    break;
+                case BHE::BHE_TYPE_2U:
+                    break; 
+                case BHE::BHE_TYPE_CXA:
+                    break; 
+                case BHE::BHE_TYPE_CXC:
+                    break;
+                }
 
             }
             // end of reading BHE parameters-------------------------------------------------------
