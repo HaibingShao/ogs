@@ -22,7 +22,9 @@ namespace ProcessLib
             std::vector<ProcessVariable> const& variables,
             std::vector<std::unique_ptr<ParameterBase>> const& parameters,
             unsigned const integration_order,
-            BaseLib::ConfigTree const& config);
+            BaseLib::ConfigTree const& config, 
+            std::map<std::string, 
+                     std::unique_ptr<MathLib::PiecewiseLinearInterpolation>> const& curves);
 
     }  // namespace HeatTransportBHE
 }  // namespace ProcessLib

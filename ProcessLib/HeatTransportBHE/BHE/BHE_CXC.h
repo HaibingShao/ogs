@@ -26,7 +26,7 @@ namespace BHE  // namespace of borehole heat exchanger
                 bool   if_use_ext_Ra_Rb            /* whether Ra and Rb values are used */,
                 bool user_defined_R_vals           /* when user defined R values are used*/,
                 std::map<std::string, 
-                         std::shared_ptr<MathLib::PiecewiseLinearInterpolation>>
+                         std::unique_ptr<MathLib::PiecewiseLinearInterpolation>>
                          const& bhe_curves         /* bhe related curves */,
                 double my_L = 100                  /* length/depth of the BHE */,
                 double my_D = 0.013                /* diameter of the BHE */,
@@ -83,7 +83,7 @@ namespace BHE  // namespace of borehole heat exchanger
             threshold = my_threshold;
             
             // get the corresponding curve 
-            std::map<std::string, std::shared_ptr<MathLib::PiecewiseLinearInterpolation>>::const_iterator it;
+            std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation>>::const_iterator it;
             if (bound_type == BHE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT ||
                 bound_type == BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE)
             {
@@ -91,7 +91,7 @@ namespace BHE  // namespace of borehole heat exchanger
                 if (it != _bhe_curves.end())
                 {
                     // curve successfully found
-                    _power_in_watt_curve = it->second;
+                    _power_in_watt_curve = it->second.get();
                 }
                 else
                 {
@@ -123,7 +123,7 @@ namespace BHE  // namespace of borehole heat exchanger
                 if (it != _bhe_curves.end())
                 {
                     // curve successfully found
-                    _flowrate_curve = it->second;
+                    _flowrate_curve = it->second.get();
                 }
                 else
                 {
@@ -185,13 +185,8 @@ namespace BHE  // namespace of borehole heat exchanger
                 int flag_valid = false;
                 // double Q_r_tmp = GetCurveValue(flowrate_curve_idx, 0, current_time, &flag_valid);
                 double Q_r_tmp(0.0);
-                if (auto tmp_curve = _flowrate_curve.lock())
-                {
-                    Q_r_tmp = tmp_curve->getValue(current_time);
-                    update_flow_rate(Q_r_tmp);
-                }
-                else
-                    ERR("The flow_rate_curve cannot get correct data! \n");
+                Q_r_tmp = _flowrate_curve->getValue(current_time);
+                update_flow_rate(Q_r_tmp);
             }
         };
 

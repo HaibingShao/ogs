@@ -339,7 +339,7 @@ void ProjectData::parseProcesses(BaseLib::ConfigTree const& processes_config,
             process = ProcessLib::HeatTransportBHE::createHeatTransportBHEProcess(
                 *_mesh_vec[0], std::move(jacobian_assembler),
                 _process_variables, _parameters, integration_order,
-                process_config);
+                process_config, _curves);
         }
         else if (type == "HYDRO_MECHANICS")
         {
