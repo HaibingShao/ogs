@@ -33,7 +33,9 @@ namespace ProcessLib
             std::vector<ProcessVariable> const& variables,
             std::vector<std::unique_ptr<ParameterBase>> const& parameters,
             unsigned const integration_order,
-            BaseLib::ConfigTree const& config)
+            BaseLib::ConfigTree const& config, 
+            std::map<std::string,
+                     std::unique_ptr<MathLib::PiecewiseLinearInterpolation>> const& curves)
         {
             //! \ogs_file_param{prj__processes__process__type}
             config.checkConfigParameter("type", "HEAT_TRANSPORT_BHE");
@@ -128,9 +130,6 @@ namespace ProcessLib
             // reading BHE parameters--------------------------------------------------------------
             std::vector<BHE::BHEAbstract*> vec_BHEs;
             BHE::BHE_Net BHE_network;
-            std::map<std::string, std::shared_ptr<MathLib::PiecewiseLinearInterpolation>> bhe_curves;
-
-            // TODO: read the bhe_curves
 
             // now read the BHE configurations
             auto const& bhe_configs =
@@ -295,7 +294,7 @@ namespace ProcessLib
                 case BHE::BHE_TYPE_1U:
                     BHE::BHE_1U * m_bhe_1u; 
                     m_bhe_1u = new BHE::BHE_1U(bhe_ply_name, bhe_bound_type, bhe_use_ext_therm_resis,
-                        bhe_user_defined_therm_resis, bhe_curves, bhe_length, 
+                        bhe_user_defined_therm_resis, curves, bhe_length,
                         bhe_diameter, bhe_refrigerant_flow_rate, bhe_pipe_inner_radius, 
                         bhe_pipe_outer_radius, bhe_pipe_in_wall_thickness, bhe_pipe_out_wall_thickness, 
                         bhe_refrigerant_viscosity->getValue(vars), bhe_refrigerant_density->getValue(vars), bhe_fluid_longitudinal_dispsion_length,
