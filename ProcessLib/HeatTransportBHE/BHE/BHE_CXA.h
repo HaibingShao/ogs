@@ -14,7 +14,7 @@
 namespace BHE  // namespace of borehole heat exchanger
 {
 
-    class BHE_CXA : public BHEAbstract
+    class BHE_CXA final : public BHEAbstract
     {
     public:
         /**
