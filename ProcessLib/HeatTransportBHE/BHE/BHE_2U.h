@@ -57,7 +57,7 @@ namespace BHE  // namespace of borehole heat exchanger
                bool if_flowrate_curve = false     /* whether flowrate curve is used*/,
                double my_threshold = 0.0            /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/,
                BHE_DISCHARGE_TYPE type = BHE_DISCHARGE_TYPE::BHE_DISCHARGE_TYPE_PARALLEL)
-               : BHEAbstract(BHE_TYPE::BHE_TYPE_2U, name, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve),
+               : BHEAbstract(BHE_TYPE::TYPE_2U, name, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve),
             _discharge_type(type)
         {
             _u = Eigen::Vector4d::Zero();
@@ -87,8 +87,8 @@ namespace BHE  // namespace of borehole heat exchanger
 
             // get the corresponding curve 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation>>::const_iterator it;
-            if (bound_type == BHE_BOUNDARY_TYPE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT ||
-                bound_type == BHE_BOUNDARY_TYPE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE)
+            if (bound_type == BHE_BOUNDARY_TYPE::POWER_IN_WATT_CURVE_FIXED_DT_BOUNDARY ||
+                bound_type == BHE_BOUNDARY_TYPE::BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE_BOUNDARY)
             {
                 it = _bhe_curves.find("power_in_watt_curve");
                 if (it == _bhe_curves.end())

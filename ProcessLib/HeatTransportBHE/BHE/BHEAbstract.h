@@ -41,21 +41,21 @@ namespace BHE  // namespace of borehole heat exchanger
       * list the types of borehole heat exchanger
       */
     enum class BHE_TYPE {
-        BHE_TYPE_2U,   // two u-tube borehole heat exchanger
-        BHE_TYPE_1U,   // one u-tube borehole heat exchanger
-        BHE_TYPE_CXC,  // coaxial pipe with annualar inlet
-        BHE_TYPE_CXA      // coaxial pipe with centreed inlet
+        TYPE_2U,   // two u-tube borehole heat exchanger
+        TYPE_1U,   // one u-tube borehole heat exchanger
+        TYPE_CXC,  // coaxial pipe with annualar inlet
+        TYPE_CXA      // coaxial pipe with centreed inlet
     };
 
     enum class BHE_BOUNDARY_TYPE {
-        BHE_BOUND_FIXED_INFLOW_TEMP, 
-        BHE_BOUND_FIXED_INFLOW_TEMP_CURVE,
-        BHE_BOUND_POWER_IN_WATT,
-        BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT,
-        BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT,
-        BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE,
-        BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE,
-        BHE_BOUND_FIXED_TEMP_DIFF
+        FIXED_INFLOW_TEMP_BOUNDARY, 
+        FIXED_INFLOW_TEMP_CURVE_BOUNDARY,
+        POWER_IN_WATT_BOUNDARY,
+        POWER_IN_WATT_CURVE_FIXED_DT_BOUNDARY,
+        BUILDING_POWER_IN_WATT_CURVE_FIXED_DT_BOUNDARY,
+        BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE_BOUNDARY,
+        POWER_IN_WATT_CURVE_FIXED_FLOW_RATE_BOUNDARY,
+        FIXED_TEMP_DIFF_BOUNDARY
     };
 
     /**
@@ -93,7 +93,7 @@ namespace BHE  // namespace of borehole heat exchanger
         BHEAbstract(BHE_TYPE my_type, 
             const std::string name, 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
-            BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_FIXED_INFLOW_TEMP, 
+            BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUNDARY_TYPE::FIXED_INFLOW_TEMP_BOUNDARY, 
             bool if_use_ext_Ra_Rb = false, 
             bool user_defined_R_vals = false, 
             bool if_flowrate_curve = false, 
