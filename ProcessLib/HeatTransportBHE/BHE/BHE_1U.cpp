@@ -139,8 +139,7 @@ void BHE::BHE_1U::calc_thermal_resistances()
 
     if (!std::isfinite(_R_gg))
     {
-        std::cout << "Error!!! Grout Thermal Resistance is an infinite number! The simulation will be stopped! \n" ;
-        exit(1);
+        OGS_FATAL("Error!!! Grout Thermal Resistance is an infinite number! The simulation will be stopped!" );
     }
 
     // check if constraints regarding negative thermal resistances are violated
@@ -152,8 +151,7 @@ void BHE::BHE_1U::calc_thermal_resistances()
     {
         if (user_defined_therm_resis || use_ext_therm_resis)
         {
-            std::cout << "Error!!! Constraints on thermal resistances are violated! Correction procedure can't be applied due to user defined thermal resistances! The simulation will be stopped! \n";
-            exit(1);
+            OGS_FATAL("Error!!! Constraints on thermal resistances are violated! Correction procedure can't be applied due to user defined thermal resistances! The simulation will be stopped!");
         }
         if (count == 0)
         {
@@ -174,7 +172,7 @@ void BHE::BHE_1U::calc_thermal_resistances()
             _R_gg = 2.0 * _R_gs * (R_ar - 2.0 * chi * _R_g) / (2.0 * _R_gs - R_ar + 2.0 * chi * _R_g);
             break;
         }
-        std::cout << "Warning! Correction procedure was applied due to negative thermal resistance! Correction step #" << count << "\n";
+        DBUG("Warning! Correction procedure was applied due to negative thermal resistance! Correction step #%d.\n", count);
         constraint = 1.0 / ((1.0 / _R_gg) + (1.0 / (2.0 * _R_gs)));
         count++;
     }
@@ -320,8 +318,7 @@ void BHE_1U::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_l
         laplace_coeff = (1.0 - porosity_g) * lambda_g * CSA_g2;
         break;
     default:
-        std::cout << "Error !!! The index passed to get_laplace_coeff for BHE is not correct. \n";
-        exit(1);
+        OGS_FATAL("Error !!! The index passed to get_laplace_coeff for BHE is not correct. ");
         break;
     }
 
@@ -358,8 +355,7 @@ void BHE_1U::get_advection_vector(std::size_t idx_unknown, Eigen::VectorXd & vec
         advection_coeff = 0.0;
         break;
     default:
-        std::cout << "Error !!! The index passed to get_advection_coeff for BHE is not correct. \n";
-        exit(1);
+        OGS_FATAL("Error !!! The index passed to get_advection_coeff for BHE is not correct. ");
         break;
     }
 }
@@ -393,8 +389,7 @@ double BHE_1U::get_boundary_heat_exchange_coeff(std::size_t idx_unknown)
         exchange_coeff = _PHI_gs;
         break;
     default:
-        std::cout << "Error !!! The index passed to get_boundary_heat_exchange_coeff for BHE is not correct. \n";
-        exit(1);
+        OGS_FATAL("Error !!! The index passed to get_boundary_heat_exchange_coeff for BHE is not correct. ");
         break;
     }
     return exchange_coeff;

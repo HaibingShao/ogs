@@ -27,7 +27,7 @@ void BHE_Net::add_bhe_net_elem(BHE_Net_ELE_Abstract* element)
         _bhe_net[name] = element; 
         return;
     }
-    std::cout << "BHE net element already exists!\n";
+    OGS_FATAL("BHE net element already exists!\n");
 
     _global_start_idx = 0;
 }
@@ -55,8 +55,7 @@ void BHE_Net::add_bhe_net_pipe(BHE_Net_ELE_Pipe* pipe,
         if (itr_from == _bhe_net.end())
         {
             // not existing
-            std::cout << "BHE net pipeline inlet link does not exist!\n";
-            exit(1);
+            OGS_FATAL("BHE net pipeline inlet link does not exist! ");
         }
         else
         {
@@ -69,8 +68,7 @@ void BHE_Net::add_bhe_net_pipe(BHE_Net_ELE_Pipe* pipe,
         if (itr_to == _bhe_net.end())
         {
             // not existing
-            std::cout << "BHE net pipeline outlet link does not exist!\n";
-            exit(1);
+            OGS_FATAL("BHE net pipeline outlet link does not exist!");
         }
         else
         {
@@ -83,8 +81,7 @@ void BHE_Net::add_bhe_net_pipe(BHE_Net_ELE_Pipe* pipe,
     }
     else
     {
-        std::cout << "BHE net pipeline already exists!\n";
-        exit(1);
+        OGS_FATAL("BHE net pipeline already exists!");
     }
 }
 

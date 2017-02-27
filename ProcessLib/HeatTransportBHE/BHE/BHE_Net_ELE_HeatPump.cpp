@@ -57,8 +57,6 @@ double BHE_Net_ELE_HeatPump::set_BC(double T_in, double current_time)
 			T_out = T_in - delta_T;
 		}
 		
-        // std::cout << "heat pump: " << this->get_ele_name() << ", T_in: " << T_in << ", T_out: " << T_out << std::endl;
-		// std::cout << "COP: " << COP << ", Q_bhe: " << power_bhe << ", Q_elect: " << power_el << std::endl;
         DBUG("Heat pump: \'%s\', T_in: %.2d, T_out: %.2d. \n", this->get_ele_name(), T_in, T_out );
         DBUG("COP: %.2d, Q_bhe: %.2d, Q_electricity: %.2d. \n", COP, power_bhe, power_el);
 		break;

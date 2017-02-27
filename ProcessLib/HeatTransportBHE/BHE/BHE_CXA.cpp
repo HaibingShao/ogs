@@ -134,8 +134,7 @@ void BHE_CXA::calc_thermal_resistances()
 
     if ( !std::isfinite(_R_gs) )
     {
-        std::cout << "Error!!! Grout Thermal Resistance is an infinite number! The simulation will be stopped! \n";
-        exit(1);
+        OGS_FATAL("Error!!! Grout Thermal Resistance is an infinite number! The simulation will be stopped! \n");
     }
 
 }
@@ -293,8 +292,7 @@ void BHE_CXA::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_
         laplace_coeff = (1.0 - porosity_g) * lambda_g * CSA_g;
         break;
     default:
-        std::cout << "Error !!! The index passed to get_laplace_coeff for BHE is not correct. \n";
-        exit(1);
+        OGS_FATAL("Error !!! The index passed to get_laplace_coeff for BHE is not correct. ");
         break;
     }
 
@@ -327,8 +325,7 @@ void BHE_CXA::get_advection_vector(std::size_t idx_unknown, Eigen::VectorXd & ve
         advection_coeff = 0.0;
         break;
     default:
-        std::cout << "Error !!! The index passed to get_advection_coeff for BHE is not correct. \n";
-        exit(1);
+        OGS_FATAL("Error !!! The index passed to get_advection_coeff for BHE is not correct. ");
         break;
     }
 }
@@ -358,8 +355,7 @@ double BHE_CXA::get_boundary_heat_exchange_coeff(std::size_t idx_unknown)
         exchange_coeff = _PHI_gs;
         break;
     default:
-        std::cout << "Error !!! The index passed to get_boundary_heat_exchange_coeff for BHE is not correct. \n";
-        exit(1);
+        OGS_FATAL("Error !!! The index passed to get_boundary_heat_exchange_coeff for BHE is not correct. ");
         break;
     }
     return exchange_coeff;
