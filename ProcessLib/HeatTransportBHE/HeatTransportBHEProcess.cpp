@@ -99,12 +99,12 @@ namespace ProcessLib
         }
 
         void HeatTransportBHEProcess::computeSecondaryVariableConcrete(const double t,
-            GlobalVector const& x)
+            GlobalVector const& x, StaggeredCouplingTerm const& coupled_term)
         {
             DBUG("Compute heat flux for HeatConductionProcess.");
             GlobalExecutor::executeMemberOnDereferenced(
                 &HeatTransportBHELocalAssemblerInterface::computeSecondaryVariable,
-                _local_assemblers, *_local_to_global_index_map, t, x);
+                _local_assemblers, *_local_to_global_index_map, t, x, coupled_term);
         }
 
     }  // namespace HeatTransportBHE
