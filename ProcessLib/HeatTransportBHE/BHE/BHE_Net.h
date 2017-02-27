@@ -7,8 +7,7 @@
 *
 */
 
-#ifndef BHE_NET_H
-#define BHE_NET_H
+#pragma once
 
 #include <map>
 #include "BHE_Net_ELE_Abstract.h"
@@ -80,5 +79,3 @@ namespace BHE  // namespace of borehole heat exchanger
         long _global_start_idx; 
     };
 }
-
-#endif

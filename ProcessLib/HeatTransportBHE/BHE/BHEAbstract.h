@@ -26,8 +26,7 @@
 * 
 */
 
-#ifndef BHE_ABSTRACT_H
-#define BHE_ABSTRACT_H
+#pragma once
 
 #include <iostream>
 #include "boost/math/constants/constants.hpp"
@@ -545,4 +544,4 @@ namespace BHE  // namespace of borehole heat exchanger
     };
 
 }  // end of namespace
-#endif
+

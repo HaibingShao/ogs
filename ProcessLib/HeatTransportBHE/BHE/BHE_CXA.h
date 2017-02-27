@@ -7,8 +7,7 @@
 *
 */
 
-#ifndef BHE_CXA_H
-#define BHE_CXA_H
+#pragma once
 
 #include "BHEAbstract.h"
 
@@ -356,5 +355,3 @@ namespace BHE  // namespace of borehole heat exchanger
 
 
 }  // end of namespace
-
-#endif

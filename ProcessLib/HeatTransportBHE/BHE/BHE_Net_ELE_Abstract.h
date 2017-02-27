@@ -7,8 +7,7 @@
 *
 */
 
-#ifndef BHE_NET_ELE_ABSTRACT_H
-#define BHE_NET_ELE_ABSTRACT_H
+#pragma once
 
 #include "Eigen/Eigen"
 #include "ProcessLib/Utils/ProcessUtils.h"
@@ -378,4 +377,3 @@ namespace BHE  // namespace of borehole heat exchanger
 
 }
 
-#endif

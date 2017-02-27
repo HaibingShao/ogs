@@ -7,8 +7,7 @@
 *
 */
 
-#ifndef BHE_NET_ELE_HEATPUMP_H
-#define BHE_NET_ELE_HEATPUMP_H
+#pragma once
 
 #include "BHE_Net_ELE_Abstract.h"
 
@@ -86,5 +85,3 @@ private:
 };
 
 }
-
-#endif
