@@ -142,11 +142,6 @@ namespace BHE  // namespace of borehole heat exchanger
         virtual void set_T_in_out_bottom_global_idx(std::size_t dof_BHE) = 0;
 
         /**
-          * return the type of the BHE
-          */
-        BHE_TYPE get_type() { return type; };
-
-        /**
           * return the type of boundary condition on this BHE
           */
         BHE_BOUNDARY_TYPE get_bound_type() { return bound_type; };
