@@ -36,7 +36,7 @@ namespace ProcessLib
             //! \name ODESystem interface
             //! @{
 
-            bool isLinear() const override { return true; }
+            bool isLinear() const override { return false; }
 
             void computeSecondaryVariableConcrete(double const t,
                 GlobalVector const& x, StaggeredCouplingTerm const& coupled_term) override;

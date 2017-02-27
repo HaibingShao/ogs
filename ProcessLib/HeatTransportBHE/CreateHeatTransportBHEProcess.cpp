@@ -55,7 +55,7 @@ namespace ProcessLib
             // solid phase thermal conductivity parameter.
             auto& thermal_conductivity_solid = findParameter<double>(
                 config,
-                //! \ogs_file_param_special{prj__processes__process__HEAT_TRANSPORT_BHE__thermal_conductivity_solid}
+                //! \ogs_file_param_special prj__processes__process__HEAT_TRANSPORT_BHE__thermal_conductivity_solid}
                 "thermal_conductivity_solid", parameters, 1);
 
             DBUG("Use \'%s\' as solid phase thermal conductivity parameter.",
@@ -138,7 +138,7 @@ namespace ProcessLib
 
             for (
                 auto const& bhe_conf :
-                //! \ogs_file_param{prj__processes__process___HEAT_TRANSPORT_BHE__borehole_heat_exchangers__borehole_heat_exchanger}
+                //! \ogs_file_param prj__processes__process___HEAT_TRANSPORT_BHE__borehole_heat_exchangers__borehole_heat_exchanger}
                 bhe_configs.getConfigSubtreeList("borehole_heat_exchanger"))
             {
                 auto const bhe_id = bhe_conf.getConfigAttribute<int>("id");
@@ -190,7 +190,8 @@ namespace ProcessLib
                     // only when using it, read the two resistance values
                     if (bhe_use_ext_therm_resis)
                     {
-                        bhe_intern_resistance = bhe_conf.getConfigParameterOptional<double>("bhe_internal_resistance").get();
+                        bhe_intern_resistance = *bhe_conf.getConfigParameterOptional<double>("bhe_internal_resistance");
+
                         bhe_therm_resistance = bhe_conf.getConfigParameterOptional<double>("bhe_therm_resistance").get();
                     }
                 }
@@ -217,50 +218,50 @@ namespace ProcessLib
 
                 // convert BHE type
                 BHE::BHE_TYPE bhe_type; 
-                if (bhe_type_str.compare("BHE_TYPE_1U") == 0)
-                    bhe_type = BHE::BHE_TYPE_1U;
+                if (bhe_type_str =="BHE_TYPE_1U")
+                    bhe_type = BHE_TYPE::BHE_TYPE_1U;
                 else if (bhe_type_str.compare("BHE_TYPE_2U") == 0)
-                    bhe_type = BHE::BHE_TYPE_2U;
+                    bhe_type = BHE_TYPE::BHE_TYPE_2U;
                 else if (bhe_type_str.compare("BHE_TYPE_CXC") == 0)
-                    bhe_type = BHE::BHE_TYPE_CXC;
+                    bhe_type = BHE_TYPE::BHE_TYPE_CXC;
                 else if (bhe_type_str.compare("BHE_TYPE_CXA") == 0)
-                    bhe_type = BHE::BHE_TYPE_CXA;
+                    bhe_type = BHE_TYPE::BHE_TYPE_CXA;
 
                 // convert BHE boundary type
                 BHE::BHE_BOUNDARY_TYPE bhe_bound_type; 
                 if (bhe_bound_type_str.compare("FIXED_INFLOW_TEMP") == 0)
-                    bhe_bound_type = BHE::BHE_BOUND_FIXED_INFLOW_TEMP;
+                    bhe_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_FIXED_INFLOW_TEMP;
                 else if (bhe_bound_type_str.compare("FIXED_INFLOW_TEMP_CURVE") == 0)
-                    bhe_bound_type = BHE::BHE_BOUND_FIXED_INFLOW_TEMP_CURVE;
+                    bhe_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_FIXED_INFLOW_TEMP_CURVE;
                 else if (bhe_bound_type_str.compare("POWER_IN_WATT") == 0)
                 {
-                    bhe_bound_type = BHE::BHE_BOUND_POWER_IN_WATT;
+                    bhe_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_POWER_IN_WATT;
                     bhe_power_in_watt_val = bhe_conf.getConfigParameterOptional<double>("bhe_power_in_watt_value").get();
                     bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
                 }
                 else if (bhe_bound_type_str.compare("POWER_IN_WATT_CURVE_FIXED_DT") == 0)
                 {
-                    bhe_bound_type = BHE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT;
+                    bhe_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT;
                     bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
                 }
                 else if (bhe_bound_type_str.compare("BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT") == 0)
                 {
-                    bhe_bound_type = BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT;
+                    bhe_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT;
                     bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
                 }
                 else if (bhe_bound_type_str.compare("BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE") == 0)
                 {
-                    bhe_bound_type = BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE;
+                    bhe_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE;
                     bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
                 }
                 else if (bhe_bound_type_str.compare("POWER_IN_WATT_CURVE_FIXED_FLOW_RATE") == 0)
                 {
-                    bhe_bound_type = BHE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE;
+                    bhe_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE;
                     bhe_switch_off_threshold = bhe_conf.getConfigParameterOptional<double>("bhe_switch_off_threshold").get();
                 }
                 else if (bhe_bound_type_str.compare("FIXED_TEMP_DIFF") == 0)
                 {
-                    bhe_bound_type = BHE::BHE_BOUND_FIXED_TEMP_DIFF;
+                    bhe_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_FIXED_TEMP_DIFF;
                     bhe_delta_T_val = bhe_conf.getConfigParameterOptional<double>("bhe_inout_delta_T_value").get();
                 }
 
@@ -291,7 +292,7 @@ namespace ProcessLib
                 // initialize the BHE class
                 switch (bhe_type)
                 {
-                case BHE::BHE_TYPE_1U:
+                case BHE_TYPE::BHE_TYPE_1U:
                     BHE::BHE_1U * m_bhe_1u; 
                     m_bhe_1u = new BHE::BHE_1U(bhe_ply_name, bhe_bound_type, bhe_use_ext_therm_resis,
                         bhe_user_defined_therm_resis, curves, bhe_length,
@@ -319,13 +320,13 @@ namespace ProcessLib
                         0);
 
                     break;
-                case BHE::BHE_TYPE_2U:
+                case BHE_TYPE::BHE_TYPE_2U:
                     // TODO
                     break; 
-                case BHE::BHE_TYPE_CXA:
+                case BHE_TYPE::BHE_TYPE_CXA:
                     // TODO
                     break; 
-                case BHE::BHE_TYPE_CXC:
+                case BHE_TYPE::BHE_TYPE_CXC:
                     // TODO
                     break;
                 }

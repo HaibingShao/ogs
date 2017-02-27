@@ -15,7 +15,7 @@
 namespace BHE  // namespace of borehole heat exchanger
 {
 
-    class BHE_1U : public BHEAbstract
+    class BHE_1U final : public BHEAbstract
     {
     public:
         /**
@@ -57,7 +57,7 @@ namespace BHE  // namespace of borehole heat exchanger
                double my_ext_Rgs = 0.0            /* external defined borehole thermal resistance */,
                bool if_flowrate_curve = false     /* whether flowrate curve is used*/,
                double my_threshold = 0.1)         /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/
-               : BHEAbstract(BHE::BHE_TYPE_1U, name, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve)
+               : BHEAbstract(BHE_TYPE::BHE_TYPE_1U, name, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve)
         {
             _u = Eigen::Vector2d::Zero();
             _Nu =Eigen::Vector2d::Zero();
@@ -86,8 +86,8 @@ namespace BHE  // namespace of borehole heat exchanger
 
             // get the corresponding curve 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation>>::const_iterator it; 
-            if (bound_type == BHE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT ||
-                bound_type == BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE )
+            if (bound_type == BHE_BOUNDARY_TYPE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT ||
+                bound_type == BHE_BOUNDARY_TYPE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE )
             {
                 it = _bhe_curves.find("power_in_watt_curve");
                 if (it != _bhe_curves.end())

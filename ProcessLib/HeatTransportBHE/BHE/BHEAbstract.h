@@ -41,14 +41,14 @@ namespace BHE  // namespace of borehole heat exchanger
     /**
       * list the types of borehole heat exchanger
       */
-    enum BHE_TYPE {
+    enum class BHE_TYPE {
         BHE_TYPE_2U,   // two u-tube borehole heat exchanger
         BHE_TYPE_1U,   // one u-tube borehole heat exchanger
         BHE_TYPE_CXC,  // coaxial pipe with annualar inlet
         BHE_TYPE_CXA      // coaxial pipe with centreed inlet
     };
 
-    enum BHE_BOUNDARY_TYPE {
+    enum class BHE_BOUNDARY_TYPE {
         BHE_BOUND_FIXED_INFLOW_TEMP, 
         BHE_BOUND_FIXED_INFLOW_TEMP_CURVE,
         BHE_BOUND_POWER_IN_WATT,
@@ -62,7 +62,7 @@ namespace BHE  // namespace of borehole heat exchanger
     /**
       * list the possible primary variables for the HEAT_TRANSPORT_BHE process
       */
-    enum BHE_PRIMARY_VARS {
+    enum class BHE_PRIMARY_VARS {
         BHE_TEMP_SOIL, 
         BHE_TEMP_IN_1, 
         BHE_TEMP_IN_2,
@@ -77,13 +77,13 @@ namespace BHE  // namespace of borehole heat exchanger
     /**
       * discharge type of the 2U BHE
       */
-    enum BHE_DISCHARGE_TYPE {
+    enum class BHE_DISCHARGE_TYPE {
         BHE_DISCHARGE_TYPE_PARALLEL,   // parallel discharge
         BHE_DISCHARGE_TYPE_SERIAL       // serial discharge
     };
 
     using namespace boost::math::constants;
-    const double PI = boost::math::constants::pi<double>(); 
+    static const double PI = boost::math::constants::pi<double>(); 
 
     class BHEAbstract : public BHE_Net_ELE_Abstract
     {
@@ -94,7 +94,7 @@ namespace BHE  // namespace of borehole heat exchanger
         BHEAbstract(BHE_TYPE my_type, 
             const std::string name, 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
-            BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUND_FIXED_INFLOW_TEMP, 
+            BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUNDARY_TYPE::BHE_BOUND_FIXED_INFLOW_TEMP, 
             bool if_use_ext_Ra_Rb = false, 
             bool user_defined_R_vals = false, 
             bool if_flowrate_curve = false, 

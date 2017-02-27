@@ -78,7 +78,7 @@ namespace BHE  // namespace of borehole heat exchanger
         /**
           * destructor
           */
-        ~BHE_Net_ELE_Abstract(){
+        virtual ~BHE_Net_ELE_Abstract(){
             delete [] T_in; 
             delete [] T_out; 
         }

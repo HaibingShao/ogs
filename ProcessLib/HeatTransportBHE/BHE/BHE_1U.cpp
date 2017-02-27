@@ -429,7 +429,7 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
 
     switch (this->get_bound_type())
     {
-    case BHE_BOUND_POWER_IN_WATT:
+    case BHE_BOUNDARY_TYPE::BHE_BOUND_POWER_IN_WATT:
         if (use_flowrate_curve)
         {
             Q_r_tmp = _flowrate_curve->getValue(current_time);
@@ -440,7 +440,7 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
             Q_r_tmp = Q_r;
         T_in = power_in_watt_val / Q_r_tmp / heat_cap_r / rho_r + T_out;
         break;
-    case BHE_BOUND_FIXED_TEMP_DIFF: 
+    case BHE_BOUNDARY_TYPE::BHE_BOUND_FIXED_TEMP_DIFF:
         if (use_flowrate_curve)
         {
             Q_r_tmp = _flowrate_curve->getValue(current_time);
@@ -449,7 +449,7 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
         }
         T_in = T_out + delta_T_val;
         break; 
-    case BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT:
+    case BHE_BOUNDARY_TYPE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_DT:
         // get the power value in the curve
         // power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
         power_tmp = _power_in_watt_curve->getValue(current_time);
@@ -482,7 +482,7 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
             //std::cout << "Qr: " << Q_r_tmp << std::endl;
         }
         break; 
-    case BHE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT: 
+    case BHE_BOUNDARY_TYPE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_DT:
         // get the building power value in the curve
         // building_power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid); 
         building_power_tmp = _power_in_watt_curve->getValue(current_time);
@@ -537,7 +537,7 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
             //std::cout << "Qr: " << Q_r_tmp << std::endl;
         }
         break;
-    case BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE:
+    case BHE_BOUNDARY_TYPE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE:
         // get the building power value in the curve
         // building_power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
         building_power_tmp = _power_in_watt_curve->getValue(current_time);
@@ -593,7 +593,7 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
             T_in = T_out + delta_T_val;
         }
         break;
-    case BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE: 
+    case BHE_BOUNDARY_TYPE::BHE_BOUND_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE:
         // get the power value in the curve
         // power_tmp = GetCurveValue(power_in_watt_curve_idx, 0, current_time, &flag_valid);
         power_tmp = _power_in_watt_curve->getValue(current_time);
