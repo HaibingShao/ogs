@@ -91,17 +91,14 @@ namespace BHE  // namespace of borehole heat exchanger
                 bound_type == BHE_BOUNDARY_TYPE::BHE_BOUND_BUILDING_POWER_IN_WATT_CURVE_FIXED_FLOW_RATE)
             {
                 it = _bhe_curves.find("power_in_watt_curve");
-                if (it != _bhe_curves.end())
+                if (it == _bhe_curves.end())
                 {
-                    // curve successfully found
-                    _power_in_watt_curve = it->second.get();
+                    // curve not found, fatal error
+                    OGS_FATAL("Required pow_in_watt_curve cannot be found in the BHE parameters!");
                 }
-                else
-                {
-                    // curve not found
-                    ERR("Required pow_in_watt_curve cannot be found in the BHE parameters!");
-                    abort();
-                }
+
+                // curve successfully found
+                _power_in_watt_curve = it->second.get();
             }
 
             if (if_use_ext_Ra_Rb)
@@ -122,18 +119,15 @@ namespace BHE  // namespace of borehole heat exchanger
             if (if_flowrate_curve)
             {
                 use_flowrate_curve = true;
+
                 it = _bhe_curves.find("flow_rate_curve");
-                if (it != _bhe_curves.end())
+                if (it == _bhe_curves.end())
                 {
-                    // curve successfully found
-                    _flowrate_curve = it->second.get();
+                    OGS_FATAL("Required flow_rate_curve annot be found in the BHE parameters!");
                 }
-                else
-                {
-                    // curve not found
-                    ERR("Required flow_rate_curve annot be found in the BHE parameters!");
-                    abort();
-                }
+
+                // curve successfully found
+                _flowrate_curve = it->second.get();
             }
 
             S_i  = PI * 2.0 * r_outer;
