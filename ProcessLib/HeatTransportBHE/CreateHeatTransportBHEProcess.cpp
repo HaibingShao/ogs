@@ -150,21 +150,13 @@ namespace ProcessLib
                 
                 // convert BHE type
                 BHE::BHE_TYPE bhe_type; 
-                if (bhe_type_str =="BHE_TYPE_1U")
-                    bhe_type = BHE_TYPE::TYPE_1U;
-                else if (bhe_type_str.compare("BHE_TYPE_2U") == 0)
-                    bhe_type = BHE_TYPE::TYPE_2U;
-                else if (bhe_type_str.compare("BHE_TYPE_CXC") == 0)
-                    bhe_type = BHE_TYPE::TYPE_CXC;
-                else if (bhe_type_str.compare("BHE_TYPE_CXA") == 0)
-                    bhe_type = BHE_TYPE::TYPE_CXA;
-
-                // initialize the BHE class
-                switch (bhe_type)
+                if (bhe_type_str == "BHE_TYPE_1U")
                 {
-                case BHE_TYPE::TYPE_1U:
-                    BHE::BHE_1U * m_bhe_1u; 
-                    m_bhe_1u = BHE::CreateBHE1U(config, bhe_conf, curves); 
+                    bhe_type = BHE_TYPE::TYPE_1U;
+                    BHE::BHE_1U * m_bhe_1u;
+
+                    // initialize the 1U type BHE
+                    m_bhe_1u = BHE::CreateBHE1U(config, bhe_conf, curves);
 
                     vec_BHEs.push_back(std::move(m_bhe_1u));
                     BHE_network.add_bhe_net_elem(m_bhe_1u);
@@ -172,23 +164,24 @@ namespace ProcessLib
                     // now adding a pipeline connecting the bottom of this BHE
                     BHE::BHE_Net_ELE_Pipe_Inner_1U * m_bhe_pipe_1u;
                     m_bhe_pipe_1u = new BHE::BHE_Net_ELE_Pipe_Inner_1U(m_bhe_1u->get_ele_name().append("_INNER_PIPE"), m_bhe_1u);
-                    BHE_network.add_bhe_net_pipe(m_bhe_pipe_1u,
-                        m_bhe_1u->get_ele_name(),
-                        0,
-                        m_bhe_1u->get_ele_name(),
-                        0);
+                    BHE_network.add_bhe_net_pipe(m_bhe_pipe_1u, m_bhe_1u->get_ele_name(), 0,
+                                                 m_bhe_1u->get_ele_name(), 0);
 
-                    break;
-                case BHE_TYPE::TYPE_2U:
-                    // TODO
-                    break; 
-                case BHE_TYPE::TYPE_CXA:
-                    // TODO
-                    break; 
-                case BHE_TYPE::TYPE_CXC:
-                    // TODO
-                    break;
                 }
+                else if (bhe_type_str.compare("BHE_TYPE_2U") == 0)
+                {
+                    bhe_type = BHE_TYPE::TYPE_2U;
+                }
+                else if (bhe_type_str.compare("BHE_TYPE_CXC") == 0)
+                {
+                    bhe_type = BHE_TYPE::TYPE_CXC;
+                }
+                else if (bhe_type_str.compare("BHE_TYPE_CXA") == 0)
+                {
+                    bhe_type = BHE_TYPE::TYPE_CXA;
+                }
+
+                
 
             }
             // end of reading BHE parameters-------------------------------------------------------

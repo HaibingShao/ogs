@@ -88,6 +88,9 @@ void BHE_2U::calc_thermal_resistances()
     double const& D = borehole_geometry.D;
     double const& lambda_r = refrigerant_param.lambda_r; 
     double const& lambda_g = grout_param.lambda_g;
+    double const& r_outer = pipe_param.r_outer; 
+    double const& r_inner = pipe_param.r_inner;
+    double const& lambda_p = pipe_param.lambda_p; 
 
     // thermal resistance due to advective flow of refrigerant in the pipes
     // Eq. 31 in Diersch_2011_CG
@@ -99,19 +102,19 @@ void BHE_2U::calc_thermal_resistances()
     // thermal resistance due to thermal conductivity of the pip wall material
     // Eq. 36 in Diersch_2011_CG
     double _R_con_a;
-    _R_con_a = std::log(pipe_geometry.r_outer / pipe_geometry.r_inner) / ( 2.0 * PI * lambda_p );
+    _R_con_a = std::log(r_outer / r_inner) / ( 2.0 * PI * lambda_p );
 
-    d0 = 2.0 * pipe_geometry.r_inner;
+    d0 = 2.0 * r_inner;
     s = omega * std::sqrt(2); 
     chi = std::log(std::sqrt(D*D + 4 * d0*d0) / 2 / std::sqrt(2) / d0) / std::log(D / 2 / d0);
     // Eq. 36
-    _R_con_a_i1 = _R_con_a_i2 = _R_con_a_o1 = _R_con_a_o2 = std::log(pipe_geometry.r_outer / pipe_geometry.r_inner) / (2.0 * PI * lambda_p);
+    _R_con_a_i1 = _R_con_a_i2 = _R_con_a_o1 = _R_con_a_o2 = std::log(r_outer / r_inner) / (2.0 * PI * lambda_p);
 
-    if (use_ext_therm_resis)
+    if (extern_Ra_Rb.use_extern_Ra_Rb)
     {
         R_adv = 0.25 * (_R_adv_i1 + _R_adv_i2 + _R_adv_o1 + _R_adv_o2);
         R_con = 0.25 * (_R_con_a_i1 + _R_con_a_i2 + _R_con_a_o1 + _R_con_a_o2);
-        _R_g = 4 * ext_Rb - R_adv - R_con;
+        _R_g = 4 * extern_Ra_Rb.ext_Rb - R_adv - R_con;
     }
     else
     {
@@ -121,10 +124,10 @@ void BHE_2U::calc_thermal_resistances()
     _R_con_b = chi * _R_g; 
 
     // Eq. 29 and 30
-    if (user_defined_therm_resis)
+    if (extern_def_thermal_resistances.if_use_defined_therm_resis)
     {
-        _R_fig = ext_Rfig;
-        _R_fog = ext_Rfog;
+        _R_fig = extern_def_thermal_resistances.ext_Rfig;
+        _R_fog = extern_def_thermal_resistances.ext_Rfog;
     }
     else
     {
@@ -134,16 +137,16 @@ void BHE_2U::calc_thermal_resistances()
 
 
     // thermal resistance due to grout-soil exchange
-    if (user_defined_therm_resis)
-        _R_gs = ext_Rgs;
+    if (extern_def_thermal_resistances.if_use_defined_therm_resis)
+        _R_gs = extern_def_thermal_resistances.ext_Rgs;
     else
         _R_gs = (1 - chi)*_R_g;
 
     // thermal resistance due to inter-grout exchange
     double R_ar_1, R_ar_2; 
-    if (use_ext_therm_resis)
+    if (extern_Ra_Rb.use_extern_Ra_Rb)
     {
-        R_ar_1 = (2.0 + std::sqrt(2.0)) * _R_g * (ext_Ra - R_adv - R_con) / (_R_g + ext_Ra - R_adv - R_con);
+        R_ar_1 = (2.0 + std::sqrt(2.0)) * _R_g * (extern_Ra_Rb.ext_Ra - R_adv - R_con) / (_R_g + extern_Ra_Rb.ext_Ra - R_adv - R_con);
         R_ar_2 = std::sqrt(2.0) * R_ar_1;
     }
     else
@@ -151,10 +154,10 @@ void BHE_2U::calc_thermal_resistances()
         R_ar_1 = acosh((s*s - d0*d0) / d0 / d0) / (2.0 * PI * lambda_g);
         R_ar_2 = acosh((2.0*s*s - d0*d0) / d0 / d0) / (2.0 * PI * lambda_g);
     }
-    if (user_defined_therm_resis)
+    if (extern_def_thermal_resistances.if_use_defined_therm_resis)
     {
-        _R_gg_1 = ext_Rgg1;
-        _R_gg_2 = ext_Rgg2;
+        _R_gg_1 = extern_def_thermal_resistances.ext_Rgg1;
+        _R_gg_2 = extern_def_thermal_resistances.ext_Rgg2;
     }
     else
     {
@@ -176,7 +179,7 @@ void BHE_2U::calc_thermal_resistances()
     int count = 0;
     while (constraint1 < 0.0 || constraint2 < 0.0)
     {
-        if (user_defined_therm_resis || use_ext_therm_resis)
+        if (extern_def_thermal_resistances.if_use_defined_therm_resis || extern_Ra_Rb.use_extern_Ra_Rb)
         {
             OGS_FATAL("Error!!! Constraints on thermal resistances are violated! Correction procedure can't be applied due to user defined thermal resistances! The simulation will be stopped! ");
 
@@ -221,8 +224,10 @@ void BHE_2U::calc_Nu()
     double gamma, xi; 
     double d; 
     double const& L = borehole_geometry.L;
+    double const& r_outer = pipe_param.r_outer;
+    double const& r_inner = pipe_param.r_inner;
 
-    d = 2.0 * pipe_geometry.r_inner;
+    d = 2.0 * r_inner;
 
     if ( _Re < 2300.0 )
     {
@@ -256,9 +261,11 @@ void BHE_2U::calc_Re()
     double u_norm, d; 
     double const& mu_r = refrigerant_param.mu_r;
     double const& rho_r = refrigerant_param.rho_r;
+    double const& r_outer = pipe_param.r_outer;
+    double const& r_inner = pipe_param.r_inner;
 
     u_norm = _u.norm();
-    d = 2.0 * pipe_geometry.r_inner; // inner diameter of the pipeline
+    d = 2.0 * r_inner; // inner diameter of the pipeline
 
     _Re = u_norm * d / (mu_r / rho_r) ; 
 }
@@ -293,15 +300,17 @@ void BHE_2U::calc_heat_transfer_coefficients()
 void BHE_2U::calc_u()
 {
     double tmp_u; 
+    double const& r_outer = pipe_param.r_outer;
+    double const& r_inner = pipe_param.r_inner;
 
     // which discharge type it is? 
     if (_discharge_type == BHE_DISCHARGE_TYPE::BHE_DISCHARGE_TYPE_PARALLEL)
     {
-        tmp_u = Q_r / (2.0 * PI * pipe_geometry.r_inner * pipe_geometry.r_inner);
+        tmp_u = Q_r / (2.0 * PI * r_inner * r_inner);
     }
     else  // serial discharge type
     {
-        tmp_u = Q_r / (PI * pipe_geometry.r_inner * pipe_geometry.r_inner);
+        tmp_u = Q_r / (PI * r_inner * r_inner);
     }
 
     _u(0) = tmp_u; 

@@ -104,7 +104,7 @@ namespace BHE  // namespace of borehole heat exchanger
             double D;
         };
 
-        struct Pipe_Geometry {
+        struct Pipe_Parameters {
             /**
             * radius of the pipline inner side
             * unit is m
@@ -128,6 +128,12 @@ namespace BHE  // namespace of borehole heat exchanger
             * unit is m
             */
             double b_out;
+
+            /**
+            * thermal conductivity of the pipe wall
+            * unit is kg m sec^-3 K^-1
+            */
+            double lambda_p;
         };
 
         struct Refrigerant_Parameters {
@@ -188,15 +194,66 @@ namespace BHE  // namespace of borehole heat exchanger
             double lambda_g;
         };
 
+        struct Extern_Ra_Rb {
+            /**
+            * whether or not using external given borehole thermal resistance values Ra, Rb
+            */
+            bool use_extern_Ra_Rb;
+
+            /**
+            * external given borehole internal thermal resistance value
+            */
+            double ext_Ra;
+
+            /**
+            * external given borehole thermal resistance value
+            */
+            double ext_Rb;
+        };
+
+        struct Extern_def_Thermal_Resistances {
+            /**
+            * whether or not using user defined borehole thermal resistance Rfig, Rfog, Rgg, Rgs
+            */
+            bool if_use_defined_therm_resis;
+
+            /**
+            * external given borehole internal thermal resistance value
+            */
+            double ext_Rfig;
+
+            /**
+            * external given borehole internal thermal resistance value
+            */
+            double ext_Rfog;
+
+            /**
+            * external given borehole internal thermal resistance value
+            */
+            double ext_Rgg1;
+
+            /**
+            * external given borehole internal thermal resistance value
+            */
+            double ext_Rgg2;
+
+            /**
+            * external given borehole internal thermal resistance value
+            */
+            double ext_Rgs;
+        };
+
         /**
           * constructor
           */
         BHEAbstract(BHE_TYPE my_type, 
             const std::string name, 
             Borehole_Geometry borehole_geometry_,
-            Pipe_Geometry pipe_geometry_, 
+            Pipe_Parameters pipe_param_,
             Refrigerant_Parameters refrigerant_param_, 
             Grout_Parameters grout_param_, 
+            Extern_Ra_Rb extern_Ra_Rb_,
+            Extern_def_Thermal_Resistances extern_def_thermal_resistances_, 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
             BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUNDARY_TYPE::FIXED_INFLOW_TEMP_BOUNDARY, 
             bool if_use_ext_Ra_Rb = false, 
@@ -209,12 +266,12 @@ namespace BHE  // namespace of borehole heat exchanger
                 type(my_type), 
                 _name(name), 
                 borehole_geometry(borehole_geometry_),
-                pipe_geometry(pipe_geometry_), 
+                pipe_param(pipe_param_),
                 refrigerant_param(refrigerant_param_),
                 grout_param(grout_param_),
+                extern_Ra_Rb(extern_Ra_Rb_),
+                extern_def_thermal_resistances(extern_def_thermal_resistances_),
                 bound_type(my_bound_type), 
-                use_ext_therm_resis(if_use_ext_Ra_Rb), 
-                user_defined_therm_resis(user_defined_R_vals), 
                 _bhe_curves(bhe_curves),
                 use_flowrate_curve(if_flowrate_curve)
         {};
@@ -416,12 +473,6 @@ namespace BHE  // namespace of borehole heat exchanger
         double Q_r;
 
         /**
-          * thermal conductivity of the pipe wall
-          * unit is kg m sec^-3 K^-1
-          */
-        double lambda_p; 
-
-        /**
           * geometry of the borehole
           */
         Borehole_Geometry const borehole_geometry;
@@ -429,7 +480,7 @@ namespace BHE  // namespace of borehole heat exchanger
         /**
           * geometry of the pipes in the borehole
           */
-        Pipe_Geometry const pipe_geometry;
+        Pipe_Parameters const pipe_param;
 
         /**
         * parameters of the refrigerant
@@ -440,6 +491,16 @@ namespace BHE  // namespace of borehole heat exchanger
           * parameters of the grout
           */
         Grout_Parameters const grout_param; 
+
+        /**
+          * Ra Rb values defined by the user externally
+          */
+        Extern_Ra_Rb const extern_Ra_Rb; 
+
+        /**
+          * thermal resistance values defined by the user externally
+          */
+        Extern_def_Thermal_Resistances const extern_def_thermal_resistances; 
 
         /**
           * power extracted from or injected into the BHE
@@ -461,55 +522,10 @@ namespace BHE  // namespace of borehole heat exchanger
           */
         double threshold;
 
-        /**
-          * whether or not using external given borehole thermal resistance values Ra, Rb
-          */
-        bool use_ext_therm_resis; 
-
-        /**
-          * external given borehole internal thermal resistance value
-          */
-        double ext_Ra; 
-
-        /**
-          * external given borehole thermal resistance value
-          */
-        double ext_Rb; 
-
-        /**
-          * whether or not using user defined borehole thermal resistance Rfig, Rfog, Rgg, Rgs
-          */
-        bool user_defined_therm_resis;
-
-        /**
-          * external given borehole internal thermal resistance value
-          */
-        double ext_Rfig;
-
-        /**
-          * external given borehole internal thermal resistance value
-          */
-        double ext_Rfog;
-
-        /**
-          * external given borehole internal thermal resistance value
-          */
-        double ext_Rgg1;
-
-        /**
-          * external given borehole internal thermal resistance value
-          */
-        double ext_Rgg2;
-
-        /**
-          * external given borehole internal thermal resistance value
-          */
-        double ext_Rgs;
 
         /**
           * map strucutre that contains all the curves related to this BHE
           */
-        // std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation>> const& _bhe_curves;
         std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation>> const& _bhe_curves;
 
         /**

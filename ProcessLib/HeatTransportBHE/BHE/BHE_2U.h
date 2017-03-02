@@ -22,16 +22,15 @@ namespace BHE  // namespace of borehole heat exchanger
           */
         BHE_2U(const std::string name               /* name of the BHE */,
                BHE::BHE_BOUNDARY_TYPE bound_type    /* type of BHE boundary */,
-               bool   if_use_ext_Ra_Rb              /* whether Ra and Rb values are used */,
-               bool user_defined_R_vals             /* when user defined R values are used*/,
                std::map<std::string,
                         std::unique_ptr<MathLib::PiecewiseLinearInterpolation>>
                         const& bhe_curves           /* bhe related curves */,
                Borehole_Geometry borehole_geometry = { 100,0.013 },
-               Pipe_Geometry pipe_geometry = { 0.016 /* inner radius of the pipline */,
+               Pipe_Parameters pipe_geometry = { 0.016 /* inner radius of the pipline */,
                                                0.016 /* outer radius of the pipline */,
                                                0.0029/* pipe-in wall thickness*/,
-                                               0.0029/* pipe-out wall thickness*/ },
+                                               0.0029/* pipe-out wall thickness*/, 
+                                               0.38  /* thermal conductivity of the pipe wall */},
                Refrigerant_Parameters refrigerant_param = { 0.00054741 /* dynamic viscosity of the refrigerant */,
                                                             988.1      /* density of the refrigerant */,
                                                             0.6405     /* thermal conductivity of the refrigerant */,
@@ -41,8 +40,17 @@ namespace BHE  // namespace of borehole heat exchanger
                                                 0.5   /* porosity of the grout */,
                                                 1000  /* specific heat capacity of the grout */,
                                                 2.3   /* thermal conductivity of the grout */ },
+               Extern_Ra_Rb extern_Ra_Rb = { false /* whether Ra and Rb values are used */,
+                                             0.0   /* external defined borehole internal thermal resistance */,
+                                             0.0   /* external defined borehole thermal resistance */ },
+               Extern_def_Thermal_Resistances extern_def_thermal_resistances = 
+                                           { false /* whether user defined R values are used */,
+                                             0.0   /* external defined borehole thermal resistance */,
+                                             0.0   /* external defined borehole thermal resistance */,
+                                             0.0   /* external defined borehole thermal resistance */,
+                                             0.0   /* external defined borehole thermal resistance */,
+                                             0.0   /* external defined borehole thermal resistance */ },
                double my_Qr         = 21.86 / 86400 /* total refrigerant flow discharge of BHE */,
-               double my_lambda_p   = 0.38          /* thermal conductivity of the pipe wall */,
                double my_omega      = 0.04242       /* pipe distance */,
                double my_power_in_watt = 0.0        /* injected or extracted power */,
                double my_delta_T_val = 0.0          /* Temperature difference btw inflow and outflow temperature */,
@@ -57,7 +65,7 @@ namespace BHE  // namespace of borehole heat exchanger
                double my_threshold = 0.0            /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/,
                BHE_DISCHARGE_TYPE type = BHE_DISCHARGE_TYPE::BHE_DISCHARGE_TYPE_PARALLEL)
                : BHEAbstract(BHE_TYPE::TYPE_2U, name, borehole_geometry, pipe_geometry, refrigerant_param, grout_param, 
-                             std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve),
+                             extern_Ra_Rb, extern_def_thermal_resistances, std::move(bhe_curves), bound_type, if_flowrate_curve),
             _discharge_type(type)
         {
             _u = Eigen::Vector4d::Zero();
@@ -65,7 +73,6 @@ namespace BHE  // namespace of borehole heat exchanger
 
             Q_r = my_Qr;
 
-            lambda_p = my_lambda_p; 
             omega = my_omega; 
             power_in_watt_val = my_power_in_watt; 
             delta_T_val = my_delta_T_val; 
@@ -88,21 +95,6 @@ namespace BHE  // namespace of borehole heat exchanger
                 _power_in_watt_curve = it->second.get();
             }
 
-            if (if_use_ext_Ra_Rb)
-            {
-                use_ext_therm_resis = true;
-                ext_Ra = my_ext_Ra;
-                ext_Rb = my_ext_Rb;
-            }
-            if (user_defined_R_vals)
-            {
-                user_defined_therm_resis = true;
-                ext_Rfig = my_ext_Rfig;
-                ext_Rfog = my_ext_Rfog;
-                ext_Rgg1 = my_ext_Rgg1;
-                ext_Rgg2 = my_ext_Rgg2;
-                ext_Rgs = my_ext_Rgs;
-            }
             if (if_flowrate_curve)
             {
                 use_flowrate_curve = true;

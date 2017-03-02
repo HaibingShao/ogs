@@ -75,12 +75,13 @@ void BHE_CXC::calc_thermal_resistances()
     double chi;
     double _R_con_i1, _R_con_o1;
     double const& D = borehole_geometry.D;
-    double const& r_outer = pipe_geometry.r_outer;
-    double const& r_inner = pipe_geometry.r_inner;
-    double const& b_in = pipe_geometry.b_in; 
-    double const& b_out = pipe_geometry.b_out;
+    double const& r_outer = pipe_param.r_outer;
+    double const& r_inner = pipe_param.r_inner;
+    double const& b_in = pipe_param.b_in;
+    double const& b_out = pipe_param.b_out;
     double const& lambda_r = refrigerant_param.lambda_r; 
     double const& lambda_g = grout_param.lambda_g;
+    double const& lambda_p = pipe_param.lambda_p; 
 
     Nu_in = _Nu(0);
     Nu_out = _Nu(1);
@@ -103,9 +104,9 @@ void BHE_CXC::calc_thermal_resistances()
     d_o1 = 2.0 * (r_outer + b_out);
     // Eq. 68
     chi = std::log(std::sqrt(D*D + d_o1*d_o1) / std::sqrt(2) / d_o1) / std::log(D / d_o1);
-    if (use_ext_therm_resis)
+    if (extern_Ra_Rb.use_extern_Ra_Rb)
     {
-        _R_g = ext_Rb - _R_adv_b_o1 - _R_con_o1;
+        _R_g = extern_Ra_Rb.ext_Rb - _R_adv_b_o1 - _R_con_o1;
     }
     else
     {
@@ -114,13 +115,13 @@ void BHE_CXC::calc_thermal_resistances()
     }
     // Eq. 67
     _R_con_b = chi * _R_g;
-    if (use_ext_therm_resis)
+    if (extern_Ra_Rb.use_extern_Ra_Rb)
     {
-        _R_ff = ext_Ra;
+        _R_ff = extern_Ra_Rb.ext_Ra;
     }
-    else if (user_defined_therm_resis)
+    else if (extern_def_thermal_resistances.if_use_defined_therm_resis)
     {
-        _R_ff = ext_Rgg1; // Attention! Here ext_Rgg1 is treated as Rff for coaxial type
+        _R_ff = extern_def_thermal_resistances.ext_Rgg1; // Attention! Here ext_Rgg1 is treated as Rff for coaxial type
     }
     else
     {
@@ -128,14 +129,14 @@ void BHE_CXC::calc_thermal_resistances()
         _R_ff = _R_adv_i1 + _R_adv_a_o1 + _R_con_i1;
     }
     // Eq. 57
-    if (user_defined_therm_resis)
-        _R_fog = ext_Rfog;
+    if (extern_def_thermal_resistances.if_use_defined_therm_resis)
+        _R_fog = extern_def_thermal_resistances.ext_Rfog;
     else
     _R_fog = _R_adv_b_o1 + _R_con_o1 + _R_con_b;
 
     // thermal resistance due to grout-soil exchange
-    if (user_defined_therm_resis)
-        _R_gs = ext_Rgs;
+    if (extern_def_thermal_resistances.if_use_defined_therm_resis)
+        _R_gs = extern_def_thermal_resistances.ext_Rgs;
     else
         _R_gs = (1 - chi)*_R_g;
 
@@ -156,10 +157,10 @@ void BHE_CXC::calc_Nu()
     double gamma, xi;
     double d_o1, d_i1, d_h;
     double const& L = borehole_geometry.L;
-    double const& r_outer = pipe_geometry.r_outer; 
-    double const& r_inner = pipe_geometry.r_inner;
-    double const& b_in = pipe_geometry.b_in;
-    double const& b_out = pipe_geometry.b_out;
+    double const& r_outer = pipe_param.r_outer;
+    double const& r_inner = pipe_param.r_inner;
+    double const& b_in = pipe_param.b_in;
+    double const& b_out = pipe_param.b_out;
 
     d_o1 = 2.0 * r_outer;
     d_i1 = 2.0 * r_inner;
@@ -216,9 +217,9 @@ void BHE_CXC::calc_Nu()
 void BHE_CXC::calc_Re()
 {
     double d_i1, d_h;
-    double const& r_outer = pipe_geometry.r_outer;
-    double const& r_inner = pipe_geometry.r_inner;
-    double const& b_in = pipe_geometry.b_in;
+    double const& r_outer = pipe_param.r_outer;
+    double const& r_inner = pipe_param.r_inner;
+    double const& b_in = pipe_param.b_in;
     double const& mu_r = refrigerant_param.mu_r;
     double const& rho_r = refrigerant_param.rho_r;
 
@@ -259,9 +260,9 @@ void BHE_CXC::calc_heat_transfer_coefficients()
 void BHE_CXC::calc_u()
 {
     double u_in, u_out;
-    double const& r_outer = pipe_geometry.r_outer;
-    double const& r_inner = pipe_geometry.r_inner;
-    double const& b_in = pipe_geometry.b_in;
+    double const& r_outer = pipe_param.r_outer;
+    double const& r_inner = pipe_param.r_inner;
+    double const& b_in = pipe_param.b_in;
 
     u_in = Q_r / (PI * r_inner * r_inner);
     u_out = Q_r / (PI * (r_outer * r_outer - (r_inner + b_in) * (r_inner + b_in)));

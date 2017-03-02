@@ -158,21 +158,28 @@ namespace BHE
         vars[static_cast<int>(MaterialLib::Fluid::PropertyVariableType::T)] = 298.15;
         vars[static_cast<int>(MaterialLib::Fluid::PropertyVariableType::p)] = 101325.0;
 
-        BHE::BHE_1U * m_bhe_1u = m_bhe_1u = new BHE::BHE_1U(bhe_ply_name, bhe_bound_type, bhe_use_ext_therm_resis,
-            bhe_user_defined_therm_resis, curves, 
-            { bhe_length, bhe_diameter }, 
-            { bhe_pipe_inner_radius, bhe_pipe_outer_radius, bhe_pipe_in_wall_thickness, bhe_pipe_out_wall_thickness }, 
+        BHE::BHE_1U * m_bhe_1u = m_bhe_1u = new BHE::BHE_1U(
+            bhe_ply_name, 
+            bhe_bound_type, 
+            curves, 
+            { bhe_length, bhe_diameter } /* Borehole Geometry */, 
+            { bhe_pipe_inner_radius, bhe_pipe_outer_radius, 
+              bhe_pipe_in_wall_thickness, bhe_pipe_out_wall_thickness, 
+              bhe_pipe_wall_thermal_conductivity } /* Pipe Parameters */,
             { bhe_refrigerant_viscosity->getValue(vars), bhe_refrigerant_density->getValue(vars),
               bhe_regrigerant_heat_conductivity->getValue(vars), bhe_refrigerant_heat_capacity->getValue(vars),
-              bhe_fluid_longitudinal_dispsion_length },
+              bhe_fluid_longitudinal_dispsion_length } /* Refrigerant Parameters */,
             { bhe_grout_density, bhe_grout_porosity,
-              bhe_grout_heat_capacity, bhe_grout_thermal_conductivity }, 
+              bhe_grout_heat_capacity, bhe_grout_thermal_conductivity } /* Grout Parameters */,
+            { bhe_use_ext_therm_resis, 
+              bhe_intern_resistance, bhe_therm_resistance } /* If using given Ra Rb values*/, 
+            { bhe_user_defined_therm_resis, 
+              bhe_R_fig, bhe_R_fog, bhe_R_gg1, bhe_R_gg2, bhe_R_gs } /* If using customed thermal resistance values*/,
             bhe_refrigerant_flow_rate,
-            bhe_pipe_wall_thermal_conductivity, 
-            bhe_pipe_distance, bhe_power_in_watt_val,
-            bhe_delta_T_val, bhe_intern_resistance, bhe_therm_resistance,
-            bhe_R_fig, bhe_R_fog, bhe_R_gg1,
-            bhe_R_gg2, bhe_R_gs, bhe_if_use_flow_rate_curve,
+            bhe_pipe_distance, 
+            bhe_power_in_watt_val,
+            bhe_delta_T_val, 
+            bhe_if_use_flow_rate_curve,
             bhe_switch_off_threshold);
 
         return m_bhe_1u;
