@@ -37,12 +37,12 @@ namespace BHE  // namespace of borehole heat exchanger
                                                             0.6405     /* thermal conductivity of the refrigerant */,
                                                             4180       /* specific heat capacity of the refrigerant */,
                                                             1.0e-4     /* longitudinal dispersivity of the refrigerant in the pipeline */ },
+               Grout_Parameters grout_param = { 2190  /* density of the grout */,
+                                                0.5   /* porosity of the grout */,
+                                                1000  /* specific heat capacity of the grout */,
+                                                2.3   /* thermal conductivity of the grout */ },
                double my_Qr         = 21.86 / 86400 /* total refrigerant flow discharge of BHE */,
-               double my_rho_g      = 2190          /* density of the grout */,
-               double my_porosity_g = 0.5           /* porosity of the grout */,
-               double my_heat_cap_g = 1000          /* specific heat capacity of the grout */,
                double my_lambda_p   = 0.38          /* thermal conductivity of the pipe wall */,
-               double my_lambda_g   = 2.3           /* thermal conductivity of the grout */, 
                double my_omega      = 0.04242       /* pipe distance */,
                double my_power_in_watt = 0.0        /* injected or extracted power */,
                double my_delta_T_val = 0.0          /* Temperature difference btw inflow and outflow temperature */,
@@ -56,7 +56,8 @@ namespace BHE  // namespace of borehole heat exchanger
                bool if_flowrate_curve = false     /* whether flowrate curve is used*/,
                double my_threshold = 0.0            /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/,
                BHE_DISCHARGE_TYPE type = BHE_DISCHARGE_TYPE::BHE_DISCHARGE_TYPE_PARALLEL)
-               : BHEAbstract(BHE_TYPE::TYPE_2U, name, borehole_geometry, pipe_geometry, refrigerant_param, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve),
+               : BHEAbstract(BHE_TYPE::TYPE_2U, name, borehole_geometry, pipe_geometry, refrigerant_param, grout_param, 
+                             std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve),
             _discharge_type(type)
         {
             _u = Eigen::Vector4d::Zero();
@@ -64,12 +65,7 @@ namespace BHE  // namespace of borehole heat exchanger
 
             Q_r = my_Qr;
 
-            rho_g = my_rho_g; 
-            heat_cap_g = my_heat_cap_g; 
-            porosity_g = my_porosity_g;
-
             lambda_p = my_lambda_p; 
-            lambda_g = my_lambda_g; 
             omega = my_omega; 
             power_in_watt_val = my_power_in_watt; 
             delta_T_val = my_delta_T_val; 

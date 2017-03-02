@@ -81,6 +81,7 @@ void BHE::BHE_1U::calc_thermal_resistances()
     double const& D = borehole_geometry.D; 
     double const& L = borehole_geometry.L;
     double const& lambda_r = refrigerant_param.lambda_r; 
+    double const& lambda_g = grout_param.lambda_g; 
 
     // thermal resistance due to thermal conductivity of the pip wall material
     // Eq. 36 in Diersch_2011_CG
@@ -279,7 +280,10 @@ double BHE_1U::get_mass_coeff(std::size_t idx_unknown)
 {
     double const& rho_r = refrigerant_param.rho_r; 
     double const& heat_cap_r = refrigerant_param.heat_cap_r;
-
+    double const& rho_g = grout_param.rho_g;
+    double const& porosity_g = grout_param.porosity_g;
+    double const& heat_cap_g = grout_param.heat_cap_g; 
+    
     double mass_coeff = 0.0; 
 
     switch (idx_unknown)
@@ -309,6 +313,8 @@ void BHE_1U::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_l
     double const& rho_r = refrigerant_param.rho_r;
     double const& heat_cap_r = refrigerant_param.heat_cap_r;
     double const& alpha_L = refrigerant_param.alpha_L; 
+    double const& porosity_g = grout_param.porosity_g;
+    double const& lambda_g = grout_param.lambda_g;
 
     // Here we calculates the laplace coefficients in the governing 
     // equations of BHE. These governing equations can be found in 

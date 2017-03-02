@@ -76,6 +76,7 @@ void BHE_CXA::calc_thermal_resistances()
     double _R_con_i1, _R_con_o1;
     double const& D = borehole_geometry.D;
     double const& lambda_r = refrigerant_param.lambda_r; 
+    double const& lambda_g = grout_param.lambda_g;
 
     Nu_in = _Nu(0);
     Nu_out = _Nu(1);
@@ -259,6 +260,10 @@ double BHE_CXA::get_mass_coeff(std::size_t idx_unknown)
 {
     double const& rho_r = refrigerant_param.rho_r;
     double const& heat_cap_r = refrigerant_param.heat_cap_r;
+    double const& porosity_g = grout_param.porosity_g;
+    double const& rho_g = grout_param.rho_g;
+    double const& heat_cap_g = grout_param.heat_cap_g;
+
     double mass_coeff = 0.0;
 
     switch (idx_unknown)
@@ -285,6 +290,8 @@ void BHE_CXA::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_
     double const& rho_r = refrigerant_param.rho_r;
     double const& heat_cap_r = refrigerant_param.heat_cap_r;
     double const& alpha_L = refrigerant_param.alpha_L;
+    double const& porosity_g = grout_param.porosity_g;
+    double const& lambda_g = grout_param.lambda_g;
 
     // Here we calculates the laplace coefficients in the governing 
     // equations of BHE. These governing equations can be found in 

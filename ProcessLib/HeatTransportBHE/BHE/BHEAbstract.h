@@ -162,6 +162,32 @@ namespace BHE  // namespace of borehole heat exchanger
             double alpha_L;
         };
 
+        struct Grout_Parameters {
+            /**
+            * density of the grout
+            * unit is kg m-3
+            */
+            double rho_g;
+
+            /**
+            * porosity of the grout
+            * unit is [-]
+            */
+            double porosity_g;
+
+            /**
+            * specific heat capacity of the grout
+            * unit is m^2 sec^-2 K^-1
+            */
+            double heat_cap_g;
+
+            /**
+            * thermal conductivity of the grout
+            * unit is kg m sec^-3 K^-1
+            */
+            double lambda_g;
+        };
+
         /**
           * constructor
           */
@@ -170,6 +196,7 @@ namespace BHE  // namespace of borehole heat exchanger
             Borehole_Geometry borehole_geometry_,
             Pipe_Geometry pipe_geometry_, 
             Refrigerant_Parameters refrigerant_param_, 
+            Grout_Parameters grout_param_, 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
             BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUNDARY_TYPE::FIXED_INFLOW_TEMP_BOUNDARY, 
             bool if_use_ext_Ra_Rb = false, 
@@ -184,6 +211,7 @@ namespace BHE  // namespace of borehole heat exchanger
                 borehole_geometry(borehole_geometry_),
                 pipe_geometry(pipe_geometry_), 
                 refrigerant_param(refrigerant_param_),
+                grout_param(grout_param_),
                 bound_type(my_bound_type), 
                 use_ext_therm_resis(if_use_ext_Ra_Rb), 
                 user_defined_therm_resis(user_defined_R_vals), 
@@ -388,36 +416,10 @@ namespace BHE  // namespace of borehole heat exchanger
         double Q_r;
 
         /**
-          * density of the grout
-          * unit is kg m-3
-          */
-        double rho_g;
-
-        /**
-          * porosity of the grout
-          * unit is [-]
-          */
-        double porosity_g;
-
-        /**
-          * specific heat capacity of the grout
-          * unit is m^2 sec^-2 K^-1
-          */
-        double heat_cap_g;
-
-
-
-        /**
           * thermal conductivity of the pipe wall
           * unit is kg m sec^-3 K^-1
           */
         double lambda_p; 
-
-        /**
-          * thermal conductivity of the grout
-          * unit is kg m sec^-3 K^-1
-          */
-        double lambda_g;
 
         /**
           * geometry of the borehole
@@ -433,6 +435,11 @@ namespace BHE  // namespace of borehole heat exchanger
         * parameters of the refrigerant
         */
         Refrigerant_Parameters const refrigerant_param;
+
+        /**
+          * parameters of the grout
+          */
+        Grout_Parameters const grout_param; 
 
         /**
           * power extracted from or injected into the BHE
