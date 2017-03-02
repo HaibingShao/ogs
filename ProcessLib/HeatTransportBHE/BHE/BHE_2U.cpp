@@ -90,18 +90,20 @@ void BHE_2U::calc_thermal_resistances()
     // thermal resistance due to thermal conductivity of the pip wall material
     // Eq. 36 in Diersch_2011_CG
     double _R_con_a;
-    _R_con_a = std::log(r_outer / r_inner) / ( 2.0 * PI * lambda_p ); 
+    _R_con_a = std::log(pipe_geometry.r_outer / pipe_geometry.r_inner) / ( 2.0 * PI * lambda_p );
 
     // thermal resistance due to the grout transition
     double chi;
     double d0; // the average outer diameter of the pipes
     double s; // diagonal distances of pipes
     double R_adv, R_con; 
-    d0 = 2.0 * r_inner; 
+    double const& D = borehole_geometry.D;
+
+    d0 = 2.0 * pipe_geometry.r_inner;
     s = omega * std::sqrt(2); 
     chi = std::log(std::sqrt(D*D + 4 * d0*d0) / 2 / std::sqrt(2) / d0) / std::log(D / 2 / d0);
     // Eq. 36
-    _R_con_a_i1 = _R_con_a_i2 = _R_con_a_o1 = _R_con_a_o2 = std::log(r_outer / r_inner) / (2.0 * PI * lambda_p);
+    _R_con_a_i1 = _R_con_a_i2 = _R_con_a_o1 = _R_con_a_o2 = std::log(pipe_geometry.r_outer / pipe_geometry.r_inner) / (2.0 * PI * lambda_p);
 
     if (use_ext_therm_resis)
     {
@@ -216,8 +218,9 @@ void BHE_2U::calc_Nu()
     double tmp_Nu = 0.0;
     double gamma, xi; 
     double d; 
+    double const& L = borehole_geometry.L;
 
-    d = 2.0 * r_inner; 
+    d = 2.0 * pipe_geometry.r_inner;
 
     if ( _Re < 2300.0 )
     {
@@ -250,7 +253,7 @@ void BHE_2U::calc_Re()
 {
     double u_norm, d; 
     u_norm = _u.norm();
-    d = 2.0 * r_inner; // inner diameter of the pipeline
+    d = 2.0 * pipe_geometry.r_inner; // inner diameter of the pipeline
 
     _Re = u_norm * d / (mu_r / rho_r) ; 
 }
@@ -285,11 +288,11 @@ void BHE_2U::calc_u()
     // which discharge type it is? 
     if (_discharge_type == BHE_DISCHARGE_TYPE::BHE_DISCHARGE_TYPE_PARALLEL)
     {
-        tmp_u = Q_r / (2.0 * PI * r_inner * r_inner);
+        tmp_u = Q_r / (2.0 * PI * pipe_geometry.r_inner * pipe_geometry.r_inner);
     }
     else  // serial discharge type
     {
-        tmp_u = Q_r / (PI * r_inner * r_inner);
+        tmp_u = Q_r / (PI * pipe_geometry.r_inner * pipe_geometry.r_inner);
     }
 
     _u(0) = tmp_u; 

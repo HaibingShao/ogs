@@ -27,13 +27,12 @@ namespace BHE  // namespace of borehole heat exchanger
                std::map<std::string,
                         std::unique_ptr<MathLib::PiecewiseLinearInterpolation>>
                         const& bhe_curves           /* bhe related curves */,
-               double my_L          = 100           /* length/depth of the BHE */,
-               double my_D          = 0.013         /* diameter of the BHE */, 
+               Borehole_Geometry borehole_geometry = { 100,0.013 },
+               Pipe_Geometry pipe_geometry = { 0.016 /* inner radius of the pipline */,
+                                               0.016 /* outer radius of the pipline */,
+                                               0.0029/* pipe-in wall thickness*/,
+                                               0.0029/* pipe-out wall thickness*/ },
                double my_Qr         = 21.86 / 86400 /* total refrigerant flow discharge of BHE */,
-               double my_r_inner    = 0.016         /* inner radius of the pipline */,
-               double my_r_outer    = 0.016         /* outer radius of the pipline */,
-               double my_b_in       = 0.0029        /* pipe-in wall thickness*/,
-               double my_b_out      = 0.0029        /* pipe-out wall thickness*/,
                double my_mu_r       = 0.00054741    /* dynamic viscosity of the refrigerant */,
                double my_rho_r      = 988.1         /* density of the refrigerant */,
                double my_alpha_L    = 1.0e-4        /* longitudinal dispersivity of the refrigerant in the pipeline */,
@@ -57,19 +56,13 @@ namespace BHE  // namespace of borehole heat exchanger
                bool if_flowrate_curve = false     /* whether flowrate curve is used*/,
                double my_threshold = 0.0            /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/,
                BHE_DISCHARGE_TYPE type = BHE_DISCHARGE_TYPE::BHE_DISCHARGE_TYPE_PARALLEL)
-               : BHEAbstract(BHE_TYPE::TYPE_2U, name, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve),
+               : BHEAbstract(BHE_TYPE::TYPE_2U, name, borehole_geometry, pipe_geometry, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve),
             _discharge_type(type)
         {
             _u = Eigen::Vector4d::Zero();
             _Nu = Eigen::Vector4d::Zero(); 
 
-            L = my_L;
-            D = my_D; 
             Q_r = my_Qr;
-            r_inner = my_r_inner;
-            r_outer = my_r_outer; 
-            b_in = my_b_in; 
-            b_out = my_b_out; 
             mu_r = my_mu_r; 
             rho_r = my_rho_r; 
             alpha_L = my_alpha_L;
@@ -84,6 +77,7 @@ namespace BHE  // namespace of borehole heat exchanger
             power_in_watt_val = my_power_in_watt; 
             delta_T_val = my_delta_T_val; 
             threshold = my_threshold;
+            double const& D = borehole_geometry.D;
 
             // get the corresponding curve 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation>>::const_iterator it;
@@ -130,17 +124,17 @@ namespace BHE  // namespace of borehole heat exchanger
                 _flowrate_curve = it->second.get();
             }
 
-            S_i  = PI * 2.0 * r_outer;
-            S_o  = PI * 2.0 * r_outer; 
+            S_i  = PI * 2.0 * pipe_geometry.r_outer;
+            S_o  = PI * 2.0 * pipe_geometry.r_outer;
             S_g1 = 0.5 * D; 
             S_g2 = D;
             S_gs = 0.25 * PI * D; 
 
             // cross section area calculation
-            CSA_i = PI * r_inner * r_inner;
-            CSA_o = PI * r_inner * r_inner;
-            CSA_g1 = PI * (0.0625 * D * D - r_outer * r_outer); // one fourth of the crosssection minus the crossection of pipe
-            CSA_g2 = PI * (0.0625 * D * D - r_outer * r_outer); // one fourth of the crosssection minus the crossection of pipe
+            CSA_i = PI * pipe_geometry.r_inner * pipe_geometry.r_inner;
+            CSA_o = PI * pipe_geometry.r_inner * pipe_geometry.r_inner;
+            CSA_g1 = PI * (0.0625 * D * D - pipe_geometry.r_outer * pipe_geometry.r_outer); // one fourth of the crosssection minus the crossection of pipe
+            CSA_g2 = PI * (0.0625 * D * D - pipe_geometry.r_outer * pipe_geometry.r_outer); // one fourth of the crosssection minus the crossection of pipe
 
             // initialization calculation
             initialize(); 

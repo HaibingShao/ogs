@@ -74,12 +74,13 @@ void BHE_CXA::calc_thermal_resistances()
     double d_o1, d_i1, d_h;
     double chi;
     double _R_con_i1, _R_con_o1;
+    double const& D = borehole_geometry.D;
 
     Nu_in = _Nu(0);
     Nu_out = _Nu(1);
-    d_o1 = 2.0 * (r_inner + b_in);
-    d_i1 = 2.0 * r_outer;
-    d_h = 2.0 * (r_outer - (r_inner + b_in));
+    d_o1 = 2.0 * (pipe_geometry.r_inner + pipe_geometry.b_in);
+    d_i1 = 2.0 * pipe_geometry.r_outer;
+    d_h = 2.0 * (pipe_geometry.r_outer - (pipe_geometry.r_inner + pipe_geometry.b_in));
 
     // thermal resistance due to advective flow of refrigerant in the pipes
     // Eq. 58, 59, and 60 in Diersch_2011_CG
@@ -89,11 +90,11 @@ void BHE_CXA::calc_thermal_resistances()
 
     // thermal resistance due to thermal conductivity of the pip wall material
     // Eq. 66 in Diersch_2011_CG
-    _R_con_i1 = std::log( (r_outer + b_out) / r_outer) / (2.0 * PI * lambda_p);
-    _R_con_o1 = std::log( (r_inner + b_out) / r_inner) / (2.0 * PI * lambda_p);
+    _R_con_i1 = std::log( (pipe_geometry.r_outer + pipe_geometry.b_out) / pipe_geometry.r_outer) / (2.0 * PI * lambda_p);
+    _R_con_o1 = std::log( (pipe_geometry.r_inner + pipe_geometry.b_out) / pipe_geometry.r_inner) / (2.0 * PI * lambda_p);
 
     // thermal resistance due to the grout transition
-    d_i1 = 2.0 * (r_outer + b_out);
+    d_i1 = 2.0 * (pipe_geometry.r_outer + pipe_geometry.b_out);
     // Eq. 68
     chi = std::log(std::sqrt(D*D + d_i1*d_i1) / std::sqrt(2) / d_i1) / std::log(D / d_i1);
     if (use_ext_therm_resis)
@@ -149,9 +150,10 @@ void BHE_CXA::calc_Nu()
     double Nu_in(0.0), Nu_out(0.0);
     double gamma, xi;
     double d_o1, d_i1, d_h;
+    double const& L = borehole_geometry.L; 
 
-    d_o1 = 2.0 * r_inner;
-    d_i1 = 2.0 * r_outer;
+    d_o1 = 2.0 * pipe_geometry.r_inner;
+    d_i1 = 2.0 * pipe_geometry.r_outer;
 
     // first calculating Nu_out
     if (_Re_o1 < 2300.0)
@@ -172,8 +174,8 @@ void BHE_CXA::calc_Nu()
         Nu_out = (xi / 8.0 * _Re_o1 * _Pr) / (1.0 + 12.7 * std::sqrt(xi / 8.0) * (std::pow(_Pr, 2.0 / 3.0) - 1.0)) * (1.0 + std::pow(d_o1 / L, 2.0 / 3.0));
     }
 
-    d_o1 = 2.0 * (r_inner + b_in);
-    d_h = 2.0 * (r_outer - (r_inner + b_in));
+    d_o1 = 2.0 * (pipe_geometry.r_inner + pipe_geometry.b_in);
+    d_h = 2.0 * (pipe_geometry.r_outer - (pipe_geometry.r_inner + pipe_geometry.b_in));
     // then calculating Nu_in
     if (_Re_i1 < 2300.0)
     {
@@ -206,8 +208,8 @@ void BHE_CXA::calc_Re()
 {
     double d_o1, d_h;
 
-    d_o1 = 2.0 * r_inner; // inner diameter of the pipeline
-    d_h = 2.0 * (r_outer - (r_inner + b_in));
+    d_o1 = 2.0 * pipe_geometry.r_inner; // inner diameter of the pipeline
+    d_h = 2.0 * (pipe_geometry.r_outer - (pipe_geometry.r_inner + pipe_geometry.b_in));
 
     // _u(0) is u_in, and _u(1) is u_out
     _Re_o1 = _u(1) * d_o1 / (mu_r / rho_r);
@@ -239,8 +241,8 @@ void BHE_CXA::calc_u()
 {
     double u_in, u_out;
 
-    u_in = Q_r / (PI * (r_outer * r_outer - (r_inner + b_in) * (r_inner + b_in)));
-    u_out = Q_r / (PI * r_inner * r_inner);
+    u_in = Q_r / (PI * (pipe_geometry.r_outer * pipe_geometry.r_outer - (pipe_geometry.r_inner + pipe_geometry.b_in) * (pipe_geometry.r_inner + pipe_geometry.b_in)));
+    u_out = Q_r / (PI * pipe_geometry.r_inner * pipe_geometry.r_inner);
 
     _u(0) = u_in;
     _u(1) = u_out;

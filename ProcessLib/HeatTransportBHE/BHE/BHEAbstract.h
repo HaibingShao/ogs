@@ -81,17 +81,62 @@ namespace BHE  // namespace of borehole heat exchanger
         BHE_DISCHARGE_TYPE_SERIAL       // serial discharge
     };
 
+
+
     using namespace boost::math::constants;
     static const double PI = boost::math::constants::pi<double>(); 
 
     class BHEAbstract : public BHE_Net_ELE_Abstract
     {
     public:
+        
+        struct Borehole_Geometry {
+            /**
+            * length/depth of the BHE
+            * unit is m
+            */
+            double L;
+
+            /**
+            * diameter of the BHE
+            * unit is m
+            */
+            double D;
+        };
+
+        struct Pipe_Geometry {
+            /**
+            * radius of the pipline inner side
+            * unit is m
+            */
+            double r_inner;
+
+            /**
+            * radius of the pipline outer side
+            * unit is m
+            */
+            double r_outer;
+
+            /**
+            * pipe-in wall thickness
+            * unit is m
+            */
+            double b_in;
+
+            /**
+            * pipe-out wall thickness
+            * unit is m
+            */
+            double b_out;
+        };
+
         /**
           * constructor
           */
         BHEAbstract(BHE_TYPE my_type, 
             const std::string name, 
+            Borehole_Geometry borehole_geometry_,
+            Pipe_Geometry pipe_geometry_, 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
             BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUNDARY_TYPE::FIXED_INFLOW_TEMP_BOUNDARY, 
             bool if_use_ext_Ra_Rb = false, 
@@ -103,13 +148,11 @@ namespace BHE  // namespace of borehole heat exchanger
                 BHE::BHE_NET_ELE::BHE_NET_BOREHOLE, n_T_in, n_T_out), 
                 type(my_type), 
                 _name(name), 
+                borehole_geometry(borehole_geometry_),
+                pipe_geometry(pipe_geometry_), 
                 bound_type(my_bound_type), 
                 use_ext_therm_resis(if_use_ext_Ra_Rb), 
                 user_defined_therm_resis(user_defined_R_vals), 
-                /* _heating_cop_curve(nullptr), */
-                /* _cooling_cop_curve(nullptr), */
-                /* _power_in_watt_curve(nullptr), */
-                /* _flowrate_curve(nullptr), */
                 _bhe_curves(bhe_curves),
                 use_flowrate_curve(if_flowrate_curve)
         {};
@@ -310,29 +353,8 @@ namespace BHE  // namespace of borehole heat exchanger
           */
         double Q_r; 
 
-        /**
-          * radius of the pipline inner side
-          * unit is m
-          */
-        double r_inner;
 
-        /**
-          * radius of the pipline outer side
-          * unit is m
-          */
-        double r_outer;
-
-        /**
-          * pipe-in wall thickness
-          * unit is m
-          */
-        double b_in;
-
-        /**
-          * pipe-out wall thickness
-          * unit is m
-          */
-        double b_out;
+        
 
         /**
           * dynamics viscosity of the refrigerant
@@ -395,16 +417,15 @@ namespace BHE  // namespace of borehole heat exchanger
         double lambda_g;
 
         /**
-          * length/depth of the BHE
-          * unit is m
+          * geometry of the borehole
           */
-        double L; 
+        Borehole_Geometry const borehole_geometry;
 
         /**
-          * diameter of the BHE
-          * unit is m
+          * geometry of the pipes in the borehole
           */
-        double D;
+        Pipe_Geometry const pipe_geometry;
+
 
         /**
           * power extracted from or injected into the BHE

@@ -74,6 +74,11 @@ void BHE_CXC::calc_thermal_resistances()
     double d_o1, d_i1, d_h;
     double chi;
     double _R_con_i1, _R_con_o1;
+    double const& D = borehole_geometry.D;
+    double const& r_outer = pipe_geometry.r_outer;
+    double const& r_inner = pipe_geometry.r_inner;
+    double const& b_in = pipe_geometry.b_in; 
+    double const& b_out = pipe_geometry.b_out;
 
     Nu_in = _Nu(0);
     Nu_out = _Nu(1);
@@ -148,6 +153,11 @@ void BHE_CXC::calc_Nu()
     double Nu_in(0.0), Nu_out(0.0);
     double gamma, xi;
     double d_o1, d_i1, d_h;
+    double const& L = borehole_geometry.L;
+    double const& r_outer = pipe_geometry.r_outer; 
+    double const& r_inner = pipe_geometry.r_inner;
+    double const& b_in = pipe_geometry.b_in;
+    double const& b_out = pipe_geometry.b_out;
 
     d_o1 = 2.0 * r_outer;
     d_i1 = 2.0 * r_inner;
@@ -204,6 +214,9 @@ void BHE_CXC::calc_Nu()
 void BHE_CXC::calc_Re()
 {
     double d_i1, d_h;
+    double const& r_outer = pipe_geometry.r_outer;
+    double const& r_inner = pipe_geometry.r_inner;
+    double const& b_in = pipe_geometry.b_in;
 
     d_i1 = 2.0 * r_inner; // inner diameter of the pipeline
     d_h = 2.0 * (r_outer - (r_inner + b_in));
@@ -237,6 +250,9 @@ void BHE_CXC::calc_heat_transfer_coefficients()
 void BHE_CXC::calc_u()
 {
     double u_in, u_out;
+    double const& r_outer = pipe_geometry.r_outer;
+    double const& r_inner = pipe_geometry.r_inner;
+    double const& b_in = pipe_geometry.b_in;
 
     u_in = Q_r / (PI * r_inner * r_inner);
     u_out = Q_r / (PI * (r_outer * r_outer - (r_inner + b_in) * (r_inner + b_in)));

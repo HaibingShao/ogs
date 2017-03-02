@@ -27,13 +27,12 @@ namespace BHE  // namespace of borehole heat exchanger
                std::map<std::string, 
                         std::unique_ptr<MathLib::PiecewiseLinearInterpolation>> 
                         const& bhe_curves         /* bhe related curves */,
-               double my_L = 100                  /* length/depth of the BHE */,
-               double my_D = 0.013                /* diameter of the BHE */,
+               Borehole_Geometry borehole_geometry = {100,0.013},
+               Pipe_Geometry pipe_geometry = {0.016/* inner radius of the pipline */,
+                                             0.016 /* outer radius of the pipline */, 
+                                             0.0029/* pipe-in wall thickness*/, 
+                                             0.0029/* pipe-out wall thickness*/ },
                double my_Qr = 21.86 / 86400       /* total refrigerant flow discharge of BHE */,
-               double my_r_inner = 0.016          /* inner radius of the pipline */,
-               double my_r_outer = 0.016          /* outer radius of the pipline */,
-               double my_b_in = 0.0029             /* pipe-in wall thickness*/,
-               double my_b_out = 0.0029            /* pipe-out wall thickness*/,
                double my_mu_r = 0.00054741        /* dynamic viscosity of the refrigerant */,
                double my_rho_r = 988.1            /* density of the refrigerant */,
                double my_alpha_L = 1.0e-4         /* longitudinal dispersivity of the refrigerant in the pipeline */,
@@ -56,18 +55,18 @@ namespace BHE  // namespace of borehole heat exchanger
                double my_ext_Rgs = 0.0            /* external defined borehole thermal resistance */,
                bool if_flowrate_curve = false     /* whether flowrate curve is used*/,
                double my_threshold = 0.1)         /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/
-               : BHEAbstract(BHE_TYPE::TYPE_1U, name, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve)
+               : BHEAbstract(BHE_TYPE::TYPE_1U, name, borehole_geometry, pipe_geometry, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve)
         {
             _u = Eigen::Vector2d::Zero();
             _Nu =Eigen::Vector2d::Zero();
 
-            L = my_L;
-            D = my_D;
+            // L = my_L;
+            // D = my_D;
             Q_r = my_Qr;
-            r_inner = my_r_inner;
-            r_outer = my_r_outer;
-            b_in = my_b_in; 
-            b_out = my_b_out; 
+            // r_inner = my_r_inner;
+            // r_outer = my_r_outer;
+            // b_in = my_b_in; 
+            // b_out = my_b_out; 
             mu_r = my_mu_r;
             rho_r = my_rho_r;
             alpha_L = my_alpha_L;
@@ -130,14 +129,14 @@ namespace BHE  // namespace of borehole heat exchanger
             }
 
             // Table 1 in Diersch_2011_CG
-            S_i = PI * 2.0 * r_inner;
-            S_o = PI * 2.0 * r_inner;
-            S_g1 = D;
-            S_gs = 0.5 * PI * D; // Corrected value according to FEFLOW White Papers Vol V, Table 1-71
+            S_i = PI * 2.0 * pipe_geometry.r_inner;
+            S_o = PI * 2.0 * pipe_geometry.r_inner;
+            S_g1 = borehole_geometry.D;
+            S_gs = 0.5 * PI * borehole_geometry.D; // Corrected value according to FEFLOW White Papers Vol V, Table 1-71
 
             // cross section area calculation
-            CSA_i = CSA_o = PI * r_inner * r_inner;
-            CSA_g1 = CSA_g2 = PI * (0.125 * D * D - r_outer * r_outer);
+            CSA_i = CSA_o = PI * pipe_geometry.r_inner * pipe_geometry.r_inner;
+            CSA_g1 = CSA_g2 = PI * (0.125 * borehole_geometry.D * borehole_geometry.D - pipe_geometry.r_outer * pipe_geometry.r_outer);
 
             // initialization calculation
             initialize();

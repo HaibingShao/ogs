@@ -84,11 +84,13 @@ void BHE::BHE_1U::calc_thermal_resistances()
     double d0; // the average outer diameter of the pipes
     double s; // diagonal distances of pipes
     double R_adv, R_con;
+    double const& D = borehole_geometry.D; 
+    double const& L = borehole_geometry.L;
 
-    d0 = 2.0 * r_outer;
+    d0 = 2.0 * pipe_geometry.r_outer;
     s = omega * std::sqrt(2);
     // Eq. 49
-    _R_con_a_i1 = _R_con_a_o1 = std::log(r_outer / r_inner) / (2.0 * PI * lambda_p);
+    _R_con_a_i1 = _R_con_a_o1 = std::log(pipe_geometry.r_outer / pipe_geometry.r_inner) / (2.0 * PI * lambda_p);
     // Eq. 51
     chi = std::log(std::sqrt(D*D + 2 * d0*d0) / 2 / d0) / std::log(D / std::sqrt(2) / d0);
     if (use_ext_therm_resis)
@@ -196,8 +198,9 @@ void BHE_1U::calc_Nu()
     double tmp_Nu = 0.0;
     double gamma, xi;
     double d;
+    double const& L = borehole_geometry.L; 
 
-    d = 2.0 * r_inner;
+    d = 2.0 * pipe_geometry.r_inner;
 
     if (_Re < 2300.0)
     {
@@ -228,7 +231,7 @@ void BHE_1U::calc_Re()
 {
     double u_norm, d;
     u_norm = std::abs(_u(0));
-    d = 2.0 * r_inner; // inner diameter of the pipeline
+    d = 2.0 * pipe_geometry.r_inner; // inner diameter of the pipeline
 
     _Re = u_norm * d / (mu_r / rho_r);
 }
@@ -259,7 +262,7 @@ void BHE_1U::calc_u()
 {
     double tmp_u;
 
-    tmp_u = Q_r / ( PI * r_inner * r_inner);
+    tmp_u = Q_r / ( PI * pipe_geometry.r_inner * pipe_geometry.r_inner);
 
     _u(0) = tmp_u;
     _u(1) = tmp_u;

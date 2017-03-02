@@ -159,9 +159,10 @@ namespace BHE
         vars[static_cast<int>(MaterialLib::Fluid::PropertyVariableType::p)] = 101325.0;
 
         BHE::BHE_1U * m_bhe_1u = m_bhe_1u = new BHE::BHE_1U(bhe_ply_name, bhe_bound_type, bhe_use_ext_therm_resis,
-            bhe_user_defined_therm_resis, curves, bhe_length,
-            bhe_diameter, bhe_refrigerant_flow_rate, bhe_pipe_inner_radius,
-            bhe_pipe_outer_radius, bhe_pipe_in_wall_thickness, bhe_pipe_out_wall_thickness,
+            bhe_user_defined_therm_resis, curves, 
+            {bhe_length, bhe_diameter}, 
+            {bhe_pipe_inner_radius, bhe_pipe_outer_radius, bhe_pipe_in_wall_thickness, bhe_pipe_out_wall_thickness}, 
+            bhe_refrigerant_flow_rate,
             bhe_refrigerant_viscosity->getValue(vars), bhe_refrigerant_density->getValue(vars), bhe_fluid_longitudinal_dispsion_length,
             bhe_refrigerant_heat_capacity->getValue(vars), bhe_grout_density, bhe_grout_porosity,
             bhe_grout_heat_capacity, bhe_regrigerant_heat_conductivity->getValue(vars), bhe_pipe_wall_thermal_conductivity,
