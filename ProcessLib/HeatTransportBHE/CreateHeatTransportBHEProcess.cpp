@@ -41,7 +41,7 @@ namespace ProcessLib
             //! \ogs_file_param{prj__processes__process__type}
             config.checkConfigParameter("type", "HEAT_TRANSPORT_BHE");
 
-            DBUG("Create HeatTransportBHEProcess.");
+            DBUG("Create HeatTransportBHE Process.");
 
             // Process variable.
 
@@ -166,15 +166,15 @@ namespace ProcessLib
                                                  m_bhe_1u->get_ele_name(), 0);
 
                 }
-                else if (bhe_type_str.compare("BHE_TYPE_2U") == 0)
+                else if (bhe_type_str == "BHE_TYPE_2U")
                 {
                     // TODO
                 }
-                else if (bhe_type_str.compare("BHE_TYPE_CXC") == 0)
+                else if (bhe_type_str == "BHE_TYPE_CXC")
                 {
                     // TODO
                 }
-                else if (bhe_type_str.compare("BHE_TYPE_CXA") == 0)
+                else if (bhe_type_str =="BHE_TYPE_CXA")
                 {
                     // TODO
                 }
