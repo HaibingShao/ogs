@@ -32,15 +32,15 @@ namespace BHE  // namespace of borehole heat exchanger
                                                 0.05  /* outer radius of the pipline */,
                                                 0.004 /* pipe-in wall thickness*/,
                                                 0.003 /* pipe-out wall thickness*/ },
+                Refrigerant_Parameters refrigerant_param = { 0.00054741 /* dynamic viscosity of the refrigerant */,
+                                                             988.1      /* density of the refrigerant */,
+                                                             0.6405     /* thermal conductivity of the refrigerant */,
+                                                             4180       /* specific heat capacity of the refrigerant */,
+                                                             1.0e-4     /* longitudinal dispersivity of the refrigerant in the pipeline */ },
                 double my_Qr = 21.86 / 86400       /* total refrigerant flow discharge of BHE */,
-                double my_mu_r = 0.00054741        /* dynamic viscosity of the refrigerant */,
-                double my_rho_r = 988.1            /* density of the refrigerant */,
-                double my_alpha_L = 1.0e-4         /* longitudinal dispersivity of the refrigerant in the pipeline */,
-                double my_heat_cap_r = 4180        /* specific heat capacity of the refrigerant */, 
                 double my_rho_g = 2190             /* density of the grout */,
                 double my_porosity_g = 0.5         /* porosity of the grout */,
                 double my_heat_cap_g = 1000        /* specific heat capacity of the grout */,
-                double my_lambda_r = 0.6405        /* thermal conductivity of the refrigerant */,
                 double my_lambda_p = 0.38          /* thermal conductivity of the pipe wall */,
                 double my_lambda_g = 2.3           /* thermal conductivity of the grout */, 
                 double my_power_in_watt = 0.0      /* injected or extracted power */, 
@@ -54,20 +54,15 @@ namespace BHE  // namespace of borehole heat exchanger
                 double my_ext_Rgs = 0.0           /* external defined borehole thermal resistance */,
                 bool if_flowrate_curve = false     /* whether flowrate curve is used*/,
                 double my_threshold = 0.0)         /* Threshold Q value for switching off the BHE when using Q_Curve_fixed_dT B.C.*/
-                : BHEAbstract(BHE_TYPE::TYPE_CXA, name, borehole_geometry, pipe_geometry, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve)
+                : BHEAbstract(BHE_TYPE::TYPE_CXA, name, borehole_geometry, pipe_geometry, refrigerant_param, std::move(bhe_curves), bound_type, if_use_ext_Ra_Rb, user_defined_R_vals, if_flowrate_curve)
         {
             _u = Eigen::Vector2d::Zero();
             _Nu = Eigen::Vector2d::Zero();
 
             Q_r = my_Qr;
-            mu_r = my_mu_r;
-            rho_r = my_rho_r;
-            alpha_L = my_alpha_L;
-            heat_cap_r = my_heat_cap_r;
             rho_g = my_rho_g;
             heat_cap_g = my_heat_cap_g;
             porosity_g = my_porosity_g;
-            lambda_r = my_lambda_r;
             lambda_p = my_lambda_p;
             lambda_g = my_lambda_g;
             power_in_watt_val = my_power_in_watt; 

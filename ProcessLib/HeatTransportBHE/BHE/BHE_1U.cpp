@@ -73,12 +73,6 @@ void BHE_1U::set_T_in_out_bottom_global_idx(std::size_t dof_bhe)
 */
 void BHE::BHE_1U::calc_thermal_resistances()
 {
-    // thermal resistance due to thermal conductivity of the pip wall material
-    // Eq. 36 in Diersch_2011_CG
-    _R_adv_i1 = 1.0 / (_Nu(0) * lambda_r * PI);
-    _R_adv_o1 = 1.0 / (_Nu(1) * lambda_r * PI);
-
-
     // thermal resistance due to the grout transition
     double chi;
     double d0; // the average outer diameter of the pipes
@@ -86,6 +80,12 @@ void BHE::BHE_1U::calc_thermal_resistances()
     double R_adv, R_con;
     double const& D = borehole_geometry.D; 
     double const& L = borehole_geometry.L;
+    double const& lambda_r = refrigerant_param.lambda_r; 
+
+    // thermal resistance due to thermal conductivity of the pip wall material
+    // Eq. 36 in Diersch_2011_CG
+    _R_adv_i1 = 1.0 / (_Nu(0) * lambda_r * PI);
+    _R_adv_o1 = 1.0 / (_Nu(1) * lambda_r * PI);
 
     d0 = 2.0 * pipe_geometry.r_outer;
     s = omega * std::sqrt(2);
@@ -230,6 +230,9 @@ void BHE_1U::calc_Nu()
 void BHE_1U::calc_Re()
 {
     double u_norm, d;
+    double const& mu_r = refrigerant_param.mu_r; 
+    double const& rho_r = refrigerant_param.rho_r; 
+
     u_norm = std::abs(_u(0));
     d = 2.0 * pipe_geometry.r_inner; // inner diameter of the pipeline
 
@@ -241,6 +244,10 @@ void BHE_1U::calc_Re()
 */
 void BHE_1U::calc_Pr()
 {
+    double const& mu_r = refrigerant_param.mu_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
+    double const& lambda_r = refrigerant_param.lambda_r; 
+    
     _Pr = mu_r * heat_cap_r / lambda_r;
 }
 
@@ -270,6 +277,9 @@ void BHE_1U::calc_u()
 
 double BHE_1U::get_mass_coeff(std::size_t idx_unknown)
 {
+    double const& rho_r = refrigerant_param.rho_r; 
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
+
     double mass_coeff = 0.0; 
 
     switch (idx_unknown)
@@ -295,6 +305,11 @@ double BHE_1U::get_mass_coeff(std::size_t idx_unknown)
 
 void BHE_1U::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_laplace)
 {
+    double const& lambda_r = refrigerant_param.lambda_r; 
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
+    double const& alpha_L = refrigerant_param.alpha_L; 
+
     // Here we calculates the laplace coefficients in the governing 
     // equations of BHE. These governing equations can be found in 
     // 1) Diersch (2013) FEFLOW book on page 952, M.120-122, or
@@ -332,6 +347,8 @@ void BHE_1U::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_l
 
 void BHE_1U::get_advection_vector(std::size_t idx_unknown, Eigen::VectorXd & vec_advection)
 {
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
     double advection_coeff(0);
     vec_advection.setZero();
 
@@ -424,6 +441,8 @@ double BHE_1U::get_Tin_by_Tout(double T_out, double current_time = -1.0)
     double Q_r_tmp(0.0);
     double COP_tmp(0.0);
     double fac_dT = 1.0;
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
 
     switch (this->get_bound_type())
     {

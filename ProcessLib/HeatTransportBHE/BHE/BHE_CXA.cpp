@@ -75,6 +75,7 @@ void BHE_CXA::calc_thermal_resistances()
     double chi;
     double _R_con_i1, _R_con_o1;
     double const& D = borehole_geometry.D;
+    double const& lambda_r = refrigerant_param.lambda_r; 
 
     Nu_in = _Nu(0);
     Nu_out = _Nu(1);
@@ -207,6 +208,8 @@ void BHE_CXA::calc_Nu()
 void BHE_CXA::calc_Re()
 {
     double d_o1, d_h;
+    double const& mu_r = refrigerant_param.mu_r;
+    double const& rho_r = refrigerant_param.rho_r;
 
     d_o1 = 2.0 * pipe_geometry.r_inner; // inner diameter of the pipeline
     d_h = 2.0 * (pipe_geometry.r_outer - (pipe_geometry.r_inner + pipe_geometry.b_in));
@@ -221,6 +224,10 @@ void BHE_CXA::calc_Re()
 */
 void BHE_CXA::calc_Pr()
 {
+    double const& mu_r = refrigerant_param.mu_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
+    double const& lambda_r = refrigerant_param.lambda_r;
+
     _Pr = mu_r * heat_cap_r / lambda_r;
 }
 
@@ -250,6 +257,8 @@ void BHE_CXA::calc_u()
 
 double BHE_CXA::get_mass_coeff(std::size_t idx_unknown)
 {
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
     double mass_coeff = 0.0;
 
     switch (idx_unknown)
@@ -272,6 +281,11 @@ double BHE_CXA::get_mass_coeff(std::size_t idx_unknown)
 
 void BHE_CXA::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_laplace)
 {
+    double const& lambda_r = refrigerant_param.lambda_r;
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
+    double const& alpha_L = refrigerant_param.alpha_L;
+
     // Here we calculates the laplace coefficients in the governing 
     // equations of BHE. These governing equations can be found in 
     // 1) Diersch (2013) FEFLOW book on page 952, M.120-122, or
@@ -305,6 +319,8 @@ void BHE_CXA::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_
 
 void BHE_CXA::get_advection_vector(std::size_t idx_unknown, Eigen::VectorXd & vec_advection)
 {
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
     double advection_coeff(0);
     vec_advection.setZero();
 
@@ -383,6 +399,8 @@ double BHE_CXA::get_Tin_by_Tout(double T_out, double current_time = -1.0)
     double power_tmp(0.0);
     int flag_valid = true;
     double Q_r_tmp(0.0);
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
 
     switch (this->get_bound_type())
     {

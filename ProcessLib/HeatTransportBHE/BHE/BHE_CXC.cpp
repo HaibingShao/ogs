@@ -79,6 +79,7 @@ void BHE_CXC::calc_thermal_resistances()
     double const& r_inner = pipe_geometry.r_inner;
     double const& b_in = pipe_geometry.b_in; 
     double const& b_out = pipe_geometry.b_out;
+    double const& lambda_r = refrigerant_param.lambda_r; 
 
     Nu_in = _Nu(0);
     Nu_out = _Nu(1);
@@ -217,8 +218,11 @@ void BHE_CXC::calc_Re()
     double const& r_outer = pipe_geometry.r_outer;
     double const& r_inner = pipe_geometry.r_inner;
     double const& b_in = pipe_geometry.b_in;
+    double const& mu_r = refrigerant_param.mu_r;
+    double const& rho_r = refrigerant_param.rho_r;
 
-    d_i1 = 2.0 * r_inner; // inner diameter of the pipeline
+    // inner diameter of the pipeline
+    d_i1 = 2.0 * r_inner; 
     d_h = 2.0 * (r_outer - (r_inner + b_in));
 
     // _u(0) is u_in, and _u(1) is u_out
@@ -231,6 +235,10 @@ void BHE_CXC::calc_Re()
 */
 void BHE_CXC::calc_Pr()
 {
+    double const& mu_r = refrigerant_param.mu_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
+    double const& lambda_r = refrigerant_param.lambda_r;
+
     _Pr = mu_r * heat_cap_r / lambda_r;
 }
 
@@ -263,6 +271,8 @@ void BHE_CXC::calc_u()
 
 double BHE_CXC::get_mass_coeff(std::size_t idx_unknown)
 {
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
     double mass_coeff = 0.0;
 
     switch (idx_unknown)
@@ -285,6 +295,11 @@ double BHE_CXC::get_mass_coeff(std::size_t idx_unknown)
 
 void BHE_CXC::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_laplace)
 {
+    double const& lambda_r = refrigerant_param.lambda_r;
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
+    double const& alpha_L = refrigerant_param.alpha_L;
+
     // Here we calculates the laplace coefficients in the governing 
     // equations of BHE. These governing equations can be found in 
     // 1) Diersch (2013) FEFLOW book on page 952, M.120-122, or
@@ -318,6 +333,8 @@ void BHE_CXC::get_laplace_matrix(std::size_t idx_unknown, Eigen::MatrixXd & mat_
 
 void BHE_CXC::get_advection_vector(std::size_t idx_unknown, Eigen::VectorXd & vec_advection)
 {
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
     double advection_coeff(0);
     vec_advection.setZero();
 
@@ -392,6 +409,8 @@ int BHE_CXC::get_loc_shift_by_pv(BHE::BHE_PRIMARY_VARS pv_name)
 
 double BHE_CXC::get_Tin_by_Tout(double T_out, double current_time = -1.0)
 {
+    double const& rho_r = refrigerant_param.rho_r;
+    double const& heat_cap_r = refrigerant_param.heat_cap_r;
     double T_in(0.0);
     double power_tmp(0.0);
     int flag_valid = true;

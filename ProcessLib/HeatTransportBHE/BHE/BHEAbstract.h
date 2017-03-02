@@ -130,6 +130,38 @@ namespace BHE  // namespace of borehole heat exchanger
             double b_out;
         };
 
+        struct Refrigerant_Parameters {
+            /**
+              * dynamics viscosity of the refrigerant
+              * unit is kg m-1 sec-1
+              */
+            double mu_r;
+
+            /**
+              * density of the refrigerant
+              * unit is kg m-3
+              */
+            double rho_r;
+
+            /**
+              * thermal conductivity of the refrigerant
+              * unit is kg m sec^-3 K^-1
+              */
+            double lambda_r;
+
+            /**
+              * specific heat capacity of the refrigerant
+              * unit is m^2 sec^-2 K^-1
+              */
+            double heat_cap_r;
+
+            /**
+              * longitudinal dispersivity of the
+              * referigerant flow in the pipeline
+              */
+            double alpha_L;
+        };
+
         /**
           * constructor
           */
@@ -137,6 +169,7 @@ namespace BHE  // namespace of borehole heat exchanger
             const std::string name, 
             Borehole_Geometry borehole_geometry_,
             Pipe_Geometry pipe_geometry_, 
+            Refrigerant_Parameters refrigerant_param_, 
             std::map<std::string, std::unique_ptr<MathLib::PiecewiseLinearInterpolation >> const& bhe_curves,
             BHE_BOUNDARY_TYPE my_bound_type = BHE_BOUNDARY_TYPE::FIXED_INFLOW_TEMP_BOUNDARY, 
             bool if_use_ext_Ra_Rb = false, 
@@ -150,6 +183,7 @@ namespace BHE  // namespace of borehole heat exchanger
                 _name(name), 
                 borehole_geometry(borehole_geometry_),
                 pipe_geometry(pipe_geometry_), 
+                refrigerant_param(refrigerant_param_),
                 bound_type(my_bound_type), 
                 use_ext_therm_resis(if_use_ext_Ra_Rb), 
                 user_defined_therm_resis(user_defined_R_vals), 
@@ -237,7 +271,7 @@ namespace BHE  // namespace of borehole heat exchanger
           */
         virtual void update_flow_rate(double new_flow_rate)
         {
-            Q_r = new_flow_rate; 
+            Q_r = new_flow_rate;
             calc_u();
             calc_Re();
             calc_Pr();
@@ -349,30 +383,9 @@ namespace BHE  // namespace of borehole heat exchanger
 
         /**
           * total refrigerant flow discharge of BHE
-          * unit is m^3/sec 
+          * unit is m^3/sec
           */
-        double Q_r; 
-
-
-        
-
-        /**
-          * dynamics viscosity of the refrigerant
-          * unit is kg m-1 sec-1
-          */
-        double mu_r;
-
-        /**
-          * density of the refrigerant
-          * unit is kg m-3
-          */
-        double rho_r;
-
-        /**
-          * longitudinal dispersivity of the
-          * referigerant flow in the pipeline
-          */
-        double alpha_L;
+        double Q_r;
 
         /**
           * density of the grout
@@ -387,22 +400,12 @@ namespace BHE  // namespace of borehole heat exchanger
         double porosity_g;
 
         /**
-          * specific heat capacity of the refrigerant
-          * unit is m^2 sec^-2 K^-1
-          */
-        double heat_cap_r;
-
-        /**
           * specific heat capacity of the grout
           * unit is m^2 sec^-2 K^-1
           */
         double heat_cap_g;
 
-        /**
-          * thermal conductivity of the refrigerant
-          * unit is kg m sec^-3 K^-1
-          */
-        double lambda_r;
+
 
         /**
           * thermal conductivity of the pipe wall
@@ -426,6 +429,10 @@ namespace BHE  // namespace of borehole heat exchanger
           */
         Pipe_Geometry const pipe_geometry;
 
+        /**
+        * parameters of the refrigerant
+        */
+        Refrigerant_Parameters const refrigerant_param;
 
         /**
           * power extracted from or injected into the BHE
