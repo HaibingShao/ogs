@@ -149,10 +149,8 @@ namespace ProcessLib
                 const std::string bhe_type_str = bhe_conf.getConfigParameter<std::string>("bhe_type");
                 
                 // convert BHE type
-                BHE::BHE_TYPE bhe_type; 
                 if (bhe_type_str == "BHE_TYPE_1U")
                 {
-                    bhe_type = BHE_TYPE::TYPE_1U;
                     BHE::BHE_1U * m_bhe_1u;
 
                     // initialize the 1U type BHE
@@ -170,15 +168,15 @@ namespace ProcessLib
                 }
                 else if (bhe_type_str.compare("BHE_TYPE_2U") == 0)
                 {
-                    bhe_type = BHE_TYPE::TYPE_2U;
+                    // TODO
                 }
                 else if (bhe_type_str.compare("BHE_TYPE_CXC") == 0)
                 {
-                    bhe_type = BHE_TYPE::TYPE_CXC;
+                    // TODO
                 }
                 else if (bhe_type_str.compare("BHE_TYPE_CXA") == 0)
                 {
-                    bhe_type = BHE_TYPE::TYPE_CXA;
+                    // TODO
                 }
 
                 
