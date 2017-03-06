@@ -151,10 +151,8 @@ namespace ProcessLib
                 // convert BHE type
                 if (bhe_type_str == "BHE_TYPE_1U")
                 {
-                    BHE::BHE_1U * m_bhe_1u;
-
                     // initialize the 1U type BHE
-                    m_bhe_1u = BHE::CreateBHE1U(config, bhe_conf, curves);
+                    BHE::BHE_1U * m_bhe_1u = BHE::CreateBHE1U(config, bhe_conf, curves);
 
                     vec_BHEs.push_back(std::move(m_bhe_1u));
                     BHE_network.add_bhe_net_elem(m_bhe_1u);
